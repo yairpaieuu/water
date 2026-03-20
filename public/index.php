@@ -26,6 +26,13 @@ spl_autoload_register(function (string $class): void {
     }
 });
 
+// Escape helper for views
+if (!function_exists('e')) {
+    function e(mixed $value): string {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+}
+
 // Bootstrap the application
 require_once APP_PATH . '/Core/App.php';
 \App\Core\App::run();
