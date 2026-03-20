@@ -36,25 +36,25 @@ class AuthController extends BaseController
             $this->redirect('/login');
         }
 
-        $email    = $request->post('email', '');
+        $username = trim($request->post('username', ''));
         $password = $request->post('password', '');
 
         // Basic validation
         $validator = new Validator();
         $errors    = $validator->validate(
-            ['email' => $email, 'password' => $password],
-            ['email' => 'required|email', 'password' => 'required|min:6']
+            ['username' => $username, 'password' => $password],
+            ['username' => 'required', 'password' => 'required']
         );
 
         if (!empty($errors)) {
             Session::flash('error', reset($errors));
-            Session::flash('old_email', $email);
+            Session::flash('old_username', $username);
             $this->redirect('/login');
         }
 
-        if (!Auth::login($email, $password)) {
-            Session::flash('error', 'Invalid email or password.');
-            Session::flash('old_email', $email);
+        if (!Auth::login($username, $password)) {
+            Session::flash('error', 'Invalid username or password.');
+            Session::flash('old_username', $username);
             $this->redirect('/login');
         }
 

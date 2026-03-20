@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
     `id`          INT UNSIGNED     NOT NULL AUTO_INCREMENT,
     `name`        VARCHAR(150)     NOT NULL,
+    `username`    VARCHAR(100)     NOT NULL,
     `email`       VARCHAR(180)     NOT NULL,
     `password`    VARCHAR(255)     NOT NULL,
     `role`        ENUM('admin','manager','technician','sales') NOT NULL DEFAULT 'sales',
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `users` (
     `created_at`  DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`  DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_users_username` (`username`),
     UNIQUE KEY `uq_users_email` (`email`),
     KEY `idx_users_branch_id` (`branch_id`),
     KEY `idx_users_role`      (`role`),
@@ -466,12 +468,13 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- Seed Data
 -- ============================================================
 
--- Admin user (password: Admin@1234)
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `status`, `created_at`, `updated_at`)
+-- Admin user (username: admin / password: admin)
+INSERT INTO `users` (`name`, `username`, `email`, `password`, `role`, `status`, `created_at`, `updated_at`)
 VALUES (
-    'System Admin',
+    'admin',
+    'admin',
     'admin@aquacrm.com',
-    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    '$2y$10$G3Xv8EgWJShp2caELfVkYeyHJ.IYTSadEAy3btMWYt1wywoLOd5BS',
     'admin',
     'active',
     NOW(),
@@ -496,3 +499,44 @@ VALUES
     ('S112M', 'S1 12 Month',       'S1 commercial service every 12 months',  12, 'commercial', 8500.00, NOW(), NOW()),
     ('S118M', 'S1 18 Month',       'S1 commercial service every 18 months',  18, 'commercial', 11000.00, NOW(), NOW()),
     ('S124M', 'S1 24 Month',       'S1 commercial service every 24 months',  24, 'commercial', 14000.00, NOW(), NOW());
+
+-- ------------------------------------------------------------
+-- settings
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS `settings`;
+CREATE TABLE IF NOT EXISTS `settings` (
+    `id`         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    `key`        VARCHAR(100)  NOT NULL,
+    `value`      TEXT          DEFAULT NULL,
+    `created_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_settings_key` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default settings
+INSERT INTO `settings` (`key`, `value`, `created_at`, `updated_at`) VALUES
+    ('app_name',  'AquaCRM', NOW(), NOW()),
+    ('timezone',  'Asia/Colombo', NOW(), NOW()),
+    ('currency',  'LKR', NOW(), NOW()),
+    ('app_logo',  '', NOW(), NOW());
+
+-- ------------------------------------------------------------
+-- Migration helper: add username column to existing databases
+-- (safe to run on a fresh install too — column already exists)
+-- ------------------------------------------------------------
+SET @col_exists = (
+    SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME   = 'users'
+      AND COLUMN_NAME  = 'username'
+);
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE `users` ADD COLUMN `username` VARCHAR(100) NOT NULL DEFAULT \'\' AFTER `name`, ADD UNIQUE KEY `uq_users_username` (`username`)',
+    'SELECT 1'
+);
+PREPARE _stmt FROM @sql;
+EXECUTE _stmt;
+DEALLOCATE PREPARE _stmt;
+
+SET FOREIGN_KEY_CHECKS = 1;

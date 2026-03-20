@@ -126,8 +126,10 @@ class App
         $router->get('/reports/inventory',  'ReportController@inventoryReport', ['auth']);
 
         // Settings
-        $router->get('/settings',          'SettingController@index',      ['auth']);
-        $router->post('/settings/update',  'SettingController@update',     ['auth']);
+        $router->get('/settings',                'SettingController@index',       ['auth']);
+        $router->post('/settings/update',        'SettingController@update',      ['auth']);
+        $router->post('/settings/upload-logo',   'SettingController@uploadLogo',  ['auth']);
+        $router->post('/settings/remove-logo',   'SettingController@removeLogo',  ['auth']);
 
         // User management
         $router->get('/users',               'SettingController@indexUsers',  ['auth']);

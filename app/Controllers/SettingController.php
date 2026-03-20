@@ -62,6 +62,97 @@ class SettingController extends BaseController
         $this->success('Settings updated successfully.', '/settings');
     }
 
+    public function uploadLogo(): void
+    {
+        $request = new Request();
+        if (!CSRF::verify($request->post('_csrf_token', ''))) {
+            $this->error('Invalid request');
+        }
+
+        if (empty($_FILES['app_logo']['tmp_name'])) {
+            Session::flash('error', 'No file selected.');
+            $this->redirect('/settings');
+        }
+
+        $file      = $_FILES['app_logo'];
+        $allowed   = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $maxBytes  = 2 * 1024 * 1024; // 2 MB
+
+        // Validate MIME using finfo for security
+        $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
+
+        if (!in_array($mimeType, $allowed, true)) {
+            Session::flash('error', 'Invalid file type. Only JPEG, PNG, GIF, WebP, and SVG are allowed.');
+            $this->redirect('/settings');
+        }
+
+        if ($file['size'] > $maxBytes) {
+            Session::flash('error', 'File too large. Maximum size is 2 MB.');
+            $this->redirect('/settings');
+        }
+
+        // Build safe filename
+        $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $ext      = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $ext));
+        $filename = 'logo_' . time() . '.' . $ext;
+        $uploadDir = BASE_PATH . '/public/assets/uploads/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+            Session::flash('error', 'Failed to upload file. Please try again.');
+            $this->redirect('/settings');
+        }
+
+        // Delete old logo file if it exists
+        $db  = Database::getInstance();
+        $old = $db->fetch("SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1");
+        if ($old && !empty($old['value'])) {
+            $oldFile = $uploadDir . $old['value'];
+            if (is_file($oldFile)) {
+                @unlink($oldFile);
+            }
+        }
+
+        // Save filename to settings
+        $existing = $db->fetch("SELECT `id` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1");
+        if ($existing !== false) {
+            $db->update('settings', ['value' => $filename, 'updated_at' => date('Y-m-d H:i:s')], ['key' => 'app_logo']);
+        } else {
+            $db->insert('settings', [
+                'key'        => 'app_logo',
+                'value'      => $filename,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $this->success('Logo updated successfully.', '/settings');
+    }
+
+    public function removeLogo(): void
+    {
+        $request = new Request();
+        if (!CSRF::verify($request->post('_csrf_token', ''))) {
+            $this->error('Invalid request');
+        }
+
+        $db  = Database::getInstance();
+        $old = $db->fetch("SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1");
+        if ($old && !empty($old['value'])) {
+            $oldFile = BASE_PATH . '/public/assets/uploads/' . $old['value'];
+            if (is_file($oldFile)) {
+                @unlink($oldFile);
+            }
+        }
+
+        $db->update('settings', ['value' => '', 'updated_at' => date('Y-m-d H:i:s')], ['key' => 'app_logo']);
+        $this->success('Logo removed successfully.', '/settings');
+    }
+
     public function indexUsers(): void
     {
         $request  = new Request();
@@ -125,6 +216,7 @@ class SettingController extends BaseController
 
         $data = [
             'name'      => $request->post('name', ''),
+            'username'  => $request->post('username', ''),
             'email'     => $request->post('email', ''),
             'password'  => $request->post('password', ''),
             'role'      => $request->post('role', 'sales'),
@@ -135,6 +227,7 @@ class SettingController extends BaseController
         $validator = new Validator();
         $errors    = $validator->validate($data, [
             'name'     => 'required|max:150',
+            'username' => 'required|max:100|unique:users:username',
             'email'    => 'required|email|unique:users:email',
             'password' => 'required|min:8',
             'role'     => 'required',

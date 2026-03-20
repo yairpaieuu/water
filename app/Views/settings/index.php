@@ -5,9 +5,11 @@
 
   <div class="flex gap-1 mb-6 bg-slate-100 rounded-xl p-1 w-fit">
     <button @click="tab = 'general'" :class="tab === 'general' ? 'bg-white shadow text-sky-600' : 'text-slate-600 hover:text-slate-800'" class="px-5 py-2 rounded-lg text-sm font-medium transition-all">General</button>
+    <button @click="tab = 'logo'" :class="tab === 'logo' ? 'bg-white shadow text-sky-600' : 'text-slate-600 hover:text-slate-800'" class="px-5 py-2 rounded-lg text-sm font-medium transition-all">Logo</button>
     <button @click="tab = 'branches'" :class="tab === 'branches' ? 'bg-white shadow text-sky-600' : 'text-slate-600 hover:text-slate-800'" class="px-5 py-2 rounded-lg text-sm font-medium transition-all">Branches</button>
   </div>
 
+  <!-- General Tab -->
   <div x-show="tab === 'general'" x-cloak>
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
       <h3 class="font-semibold text-slate-800 mb-5">General Settings</h3>
@@ -27,7 +29,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
-          <input type="text" name="currency" value="<?= e($settings['currency'] ?? 'USD') ?>" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500" placeholder="USD">
+          <input type="text" name="currency" value="<?= e($settings['currency'] ?? 'LKR') ?>" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500" placeholder="LKR">
         </div>
         <div class="flex justify-end pt-2">
           <button type="submit" class="px-5 py-2 bg-sky-500 text-white text-sm font-semibold rounded-lg hover:bg-sky-600 transition-colors">Save Settings</button>
@@ -36,6 +38,67 @@
     </div>
   </div>
 
+  <!-- Logo Tab -->
+  <div x-show="tab === 'logo'" x-cloak>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <h3 class="font-semibold text-slate-800 mb-5">Logo Settings</h3>
+      <p class="text-sm text-slate-500 mb-6">Upload your company logo. It will appear in the login page and the admin panel sidebar. Accepted: JPEG, PNG, GIF, WebP (max 2 MB).</p>
+
+      <!-- Current logo preview -->
+      <?php $currentLogo = $settings['app_logo'] ?? ''; ?>
+      <?php if ($currentLogo): ?>
+      <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-4">
+        <img src="<?= e('/assets/uploads/' . $currentLogo) ?>"
+             alt="Current logo"
+             class="h-16 w-auto object-contain bg-white rounded-lg p-1 border border-slate-200">
+        <div>
+          <p class="text-sm font-medium text-slate-700">Current Logo</p>
+          <p class="text-xs text-slate-400 mt-0.5"><?= e($currentLogo) ?></p>
+          <form method="POST" action="/settings/remove-logo" class="mt-2" onsubmit="return confirm('Remove the current logo?')">
+            <?= \App\Core\CSRF::field() ?>
+            <button type="submit" class="text-xs text-red-600 hover:text-red-800 font-medium">Remove logo</button>
+          </form>
+        </div>
+      </div>
+      <?php else: ?>
+      <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-sm text-slate-400">
+        No logo uploaded yet. The default icon will be used.
+      </div>
+      <?php endif; ?>
+
+      <!-- Upload form -->
+      <form method="POST" action="/settings/upload-logo" enctype="multipart/form-data" class="space-y-4">
+        <?= \App\Core\CSRF::field() ?>
+        <div x-data="{ filename: '' }">
+          <label class="block text-sm font-medium text-slate-700 mb-2">
+            <?= $currentLogo ? 'Replace Logo' : 'Upload Logo' ?>
+          </label>
+          <div class="flex items-center gap-3">
+            <label class="cursor-pointer flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+              </svg>
+              Choose File
+              <input type="file"
+                     name="app_logo"
+                     accept="image/jpeg,image/png,image/gif,image/webp"
+                     required
+                     class="sr-only"
+                     @change="filename = $event.target.files[0]?.name ?? ''">
+            </label>
+            <span x-text="filename || 'No file chosen'" class="text-sm text-slate-500"></span>
+          </div>
+        </div>
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="px-5 py-2 bg-sky-500 text-white text-sm font-semibold rounded-lg hover:bg-sky-600 transition-colors">
+            Upload Logo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Branches Tab -->
   <div x-show="tab === 'branches'" x-cloak>
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
       <div class="px-6 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-800">Branches</h3></div>

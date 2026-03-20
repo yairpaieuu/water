@@ -58,12 +58,29 @@
     <!-- Logo -->
     <div class="flex items-center justify-between h-16 px-4 border-b border-slate-700 flex-shrink-0">
         <a href="/dashboard" class="flex items-center gap-2">
+            <?php
+            $sidebarLogo = '';
+            try {
+                $logoRow = \App\Core\Database::getInstance()->fetch(
+                    "SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1"
+                );
+                if ($logoRow && !empty($logoRow['value'])) {
+                    $sidebarLogo = $logoRow['value'];
+                }
+            } catch (\Throwable) {}
+            ?>
+            <?php if ($sidebarLogo): ?>
+            <img src="<?= htmlspecialchars('/assets/uploads/' . $sidebarLogo, ENT_QUOTES, 'UTF-8') ?>"
+                 alt="Logo"
+                 class="h-8 w-auto object-contain">
+            <?php else: ?>
             <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-500">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
             </div>
+            <?php endif; ?>
             <span class="text-white font-bold text-lg tracking-tight">AquaCRM</span>
         </a>
         <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white">

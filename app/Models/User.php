@@ -24,6 +24,30 @@ class User extends BaseModel
     }
 
     /**
+     * Find a user by their username.
+     */
+    public function findByUsername(string $username): array|false
+    {
+        return $this->db->fetch(
+            "SELECT * FROM `{$this->table}` WHERE `username` = ? LIMIT 1",
+            [$username]
+        );
+    }
+
+    /**
+     * Find a user by username or email (for flexible login).
+     */
+    public function findByCredential(string $login): array|false
+    {
+        return $this->db->fetch(
+            "SELECT * FROM `{$this->table}`
+              WHERE `username` = ? OR `email` = ?
+              LIMIT 1",
+            [$login, $login]
+        );
+    }
+
+    /**
      * Stamp the last_login timestamp for the given user.
      */
     public function updateLastLogin(int $id): void

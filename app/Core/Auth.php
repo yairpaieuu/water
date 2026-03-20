@@ -10,11 +10,11 @@ class Auth
     private const SESSION_KEY = '_auth_user';
 
     /**
-     * Attempt to authenticate a user by email and password.
+     * Attempt to authenticate a user by username/email and password.
      */
-    public static function login(string $email, string $password): bool
+    public static function login(string $credential, string $password): bool
     {
-        $user = (new User())->findByEmail($email);
+        $user = (new User())->findByCredential($credential);
 
         if (!$user || !password_verify($password, $user['password'])) {
             return false;

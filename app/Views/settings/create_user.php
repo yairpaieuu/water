@@ -21,6 +21,10 @@
           <input type="text" name="name" value="<?= e($_POST['name'] ?? '') ?>" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500">
         </div>
         <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Username <span class="text-red-500">*</span></label>
+          <input type="text" name="username" value="<?= e($_POST['username'] ?? '') ?>" required autocomplete="off" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500">
+        </div>
+        <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Email <span class="text-red-500">*</span></label>
           <input type="email" name="email" value="<?= e($_POST['email'] ?? '') ?>" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-500">
         </div>

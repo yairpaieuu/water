@@ -4,12 +4,31 @@
     <!-- Card header / branding -->
     <div class="px-8 pt-8 pb-6 text-center bg-gradient-to-b from-primary-500/20 to-transparent">
         <!-- Logo mark -->
+        <?php
+        $loginLogo = '';
+        try {
+            $logoRow = \App\Core\Database::getInstance()->fetch(
+                "SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1"
+            );
+            if ($logoRow && !empty($logoRow['value'])) {
+                $loginLogo = $logoRow['value'];
+            }
+        } catch (\Throwable) {}
+        ?>
+        <?php if ($loginLogo): ?>
+        <div class="inline-flex items-center justify-center mb-4">
+            <img src="<?= htmlspecialchars('/assets/uploads/' . $loginLogo, ENT_QUOTES, 'UTF-8') ?>"
+                 alt="Logo"
+                 class="h-16 w-auto object-contain">
+        </div>
+        <?php else: ?>
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-500 shadow-lg shadow-primary-500/40 mb-4">
             <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
         </div>
+        <?php endif; ?>
         <h1 class="text-3xl font-extrabold text-white tracking-tight">AquaCRM</h1>
         <p class="mt-1 text-sm text-blue-200">Domestic Water Purification Solutions</p>
     </div>
@@ -46,25 +65,25 @@
         <form method="POST" action="/login" novalidate class="space-y-5">
             <?= $csrfField ?? '' ?>
 
-            <!-- Email -->
+            <!-- Username -->
             <div>
-                <label for="email" class="block text-sm font-medium text-blue-100 mb-1.5">
-                    Email Address
+                <label for="username" class="block text-sm font-medium text-blue-100 mb-1.5">
+                    Username
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
                     </div>
-                    <input type="email"
-                           id="email"
-                           name="email"
-                           value="<?= htmlspecialchars(\App\Core\Session::getFlash('old_email', ''), ENT_QUOTES, 'UTF-8') ?>"
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           value="<?= htmlspecialchars(\App\Core\Session::getFlash('old_username', ''), ENT_QUOTES, 'UTF-8') ?>"
                            required
-                           autocomplete="email"
-                           placeholder="you@company.com"
+                           autocomplete="username"
+                           placeholder="Enter your username"
                            class="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl
                                   text-white placeholder-slate-400
                                   focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
