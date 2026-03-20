@@ -99,7 +99,7 @@ class CustomerController extends BaseController
             'state'       => $request->post('state', '') ?: null,
             'postal_code' => $request->post('postal_code', '') ?: null,
             'branch_id'   => (int) $request->post('branch_id', 0),
-            'source'      => $request->post('source', '') ?: null,
+            'source'      => $request->post('source', '') ?: 'walk_in',
             'status'      => $request->post('status', 'active'),
             'notes'       => $request->post('notes', ''),
             'created_by'  => Auth::id(),
@@ -208,7 +208,7 @@ class CustomerController extends BaseController
             'state'       => $request->post('state', '') ?: null,
             'postal_code' => $request->post('postal_code', '') ?: null,
             'branch_id'   => (int) $request->post('branch_id', 0),
-            'source'      => $request->post('source', '') ?: null,
+            'source'      => $request->post('source', '') ?: 'walk_in',
             'status'      => $request->post('status', 'active'),
             'notes'       => $request->post('notes', ''),
         ];
