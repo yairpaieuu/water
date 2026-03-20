@@ -227,11 +227,13 @@ class ServiceController extends BaseController
                     CONCAT(c.`first_name`, ' ', c.`last_name`) AS customer_name,
                     c.`phone` AS customer_phone,
                     p.`name`  AS product_name,
+                    st.`name` AS service_type_name,
                     b.`name`  AS branch_name
                FROM `service_contracts` sc
-               JOIN `customers` c ON c.`id` = sc.`customer_id`
-          LEFT JOIN `products`  p ON p.`id` = sc.`product_id`
-          LEFT JOIN `branches`  b ON b.`id` = sc.`branch_id`"
+               JOIN `customers`     c  ON c.`id`  = sc.`customer_id`
+          LEFT JOIN `products`      p  ON p.`id`  = sc.`product_id`
+          LEFT JOIN `service_types` st ON st.`id` = sc.`service_type_id`
+          LEFT JOIN `branches`      b  ON b.`id`  = sc.`branch_id`"
             . $whereSql
             . " ORDER BY sc.`created_at` DESC",
             $params
@@ -254,7 +256,8 @@ class ServiceController extends BaseController
         $this->render('services.create_contract', [
             'pageTitle'    => 'New Service Contract',
             'customers'    => Database::getInstance()->fetchAll(
-                "SELECT id, customer_code, first_name, last_name
+                "SELECT id, customer_code,
+                        CONCAT(first_name, ' ', last_name) AS name
                    FROM `customers` WHERE `status` = 'active'
                 ORDER BY `first_name` ASC, `last_name` ASC"
             ),
@@ -263,6 +266,7 @@ class ServiceController extends BaseController
                   WHERE `status` = 'active' ORDER BY `name` ASC"
             ),
             'serviceTypes' => (new ServiceType())->findAll([], 'name ASC'),
+            'employees'    => (new Employee())->getTechnicians(),
             'branches'     => (new Branch())->getActive(),
             'csrfField'    => CSRF::field(),
             'user'         => Auth::user(),
@@ -278,21 +282,22 @@ class ServiceController extends BaseController
         }
 
         $data = [
-            'customer_id'       => (int) $request->post('customer_id', 0),
-            'product_id'        => (int) $request->post('product_id', 0),
-            'service_type_id'   => (int) $request->post('service_type_id', 0),
-            'branch_id'         => (int) $request->post('branch_id', 0),
-            'installation_date' => $request->post('installation_date', ''),
-            'next_service_date' => $request->post('next_service_date', ''),
-            'serial_number'     => $request->post('serial_number', ''),
-            'location_notes'    => $request->post('location_notes', ''),
-            'status'            => 'active',
+            'customer_id'            => (int) $request->post('customer_id', 0),
+            'product_id'             => (int) $request->post('product_id', 0),
+            'service_type_id'        => (int) $request->post('service_type_id', 0),
+            'branch_id'              => (int) $request->post('branch_id', 0),
+            'assigned_technician_id' => (int) $request->post('assigned_technician_id', 0),
+            'installation_date'      => $request->post('installation_date', '') ?: null,
+            'next_service_date'      => $request->post('next_service_date', '') ?: null,
+            'serial_number'          => $request->post('serial_number', ''),
+            'location_notes'         => $request->post('location_notes', ''),
+            'status'                 => $request->post('status', 'active'),
         ];
 
         $validator = new Validator();
         $errors    = $validator->validate($data, [
-            'customer_id' => 'required|numeric',
-            'start_date'  => 'required',
+            'customer_id'       => 'required|numeric',
+            'installation_date' => 'required',
         ]);
 
         if (!empty($errors)) {
@@ -300,7 +305,7 @@ class ServiceController extends BaseController
             $this->back();
         }
 
-        foreach (['product_id', 'service_type_id', 'branch_id'] as $field) {
+        foreach (['product_id', 'service_type_id', 'branch_id', 'assigned_technician_id'] as $field) {
             if ($data[$field] === 0) {
                 $data[$field] = null;
             }

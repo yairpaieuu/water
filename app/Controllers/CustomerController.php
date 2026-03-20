@@ -89,15 +89,20 @@ class CustomerController extends BaseController
         }
 
         $data = [
-            'first_name' => $request->post('first_name', ''),
-            'last_name'  => $request->post('last_name', ''),
-            'email'      => $request->post('email', ''),
-            'phone'      => $request->post('phone', ''),
-            'address'    => $request->post('address', ''),
-            'city'       => $request->post('city', ''),
-            'branch_id'  => (int) $request->post('branch_id', 0),
-            'notes'      => $request->post('notes', ''),
-            'status'     => 'active',
+            'first_name'  => $request->post('first_name', ''),
+            'last_name'   => $request->post('last_name', ''),
+            'email'       => $request->post('email', ''),
+            'phone'       => $request->post('phone', ''),
+            'alt_phone'   => $request->post('alt_phone', '') ?: null,
+            'address'     => $request->post('address', ''),
+            'city'        => $request->post('city', ''),
+            'state'       => $request->post('state', '') ?: null,
+            'postal_code' => $request->post('postal_code', '') ?: null,
+            'branch_id'   => (int) $request->post('branch_id', 0),
+            'source'      => $request->post('source', '') ?: null,
+            'status'      => $request->post('status', 'active'),
+            'notes'       => $request->post('notes', ''),
+            'created_by'  => Auth::id(),
         ];
 
         $validator = new Validator();
@@ -193,15 +198,19 @@ class CustomerController extends BaseController
         }
 
         $data = [
-            'first_name' => $request->post('first_name', ''),
-            'last_name'  => $request->post('last_name', ''),
-            'email'      => $request->post('email', ''),
-            'phone'      => $request->post('phone', ''),
-            'address'    => $request->post('address', ''),
-            'city'       => $request->post('city', ''),
-            'branch_id'  => (int) $request->post('branch_id', 0),
-            'status'     => $request->post('status', 'active'),
-            'notes'      => $request->post('notes', ''),
+            'first_name'  => $request->post('first_name', ''),
+            'last_name'   => $request->post('last_name', ''),
+            'email'       => $request->post('email', ''),
+            'phone'       => $request->post('phone', ''),
+            'alt_phone'   => $request->post('alt_phone', '') ?: null,
+            'address'     => $request->post('address', ''),
+            'city'        => $request->post('city', ''),
+            'state'       => $request->post('state', '') ?: null,
+            'postal_code' => $request->post('postal_code', '') ?: null,
+            'branch_id'   => (int) $request->post('branch_id', 0),
+            'source'      => $request->post('source', '') ?: null,
+            'status'      => $request->post('status', 'active'),
+            'notes'       => $request->post('notes', ''),
         ];
 
         $validator = new Validator();
