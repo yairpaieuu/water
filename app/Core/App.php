@@ -98,7 +98,10 @@ class App
         $router->get('/inventory/create',       'InventoryController@create',      ['auth']);
         $router->post('/inventory/store',       'InventoryController@store',       ['auth']);
         $router->post('/inventory/{id}/update', 'InventoryController@update',      ['auth']);
-        $router->post('/stock/adjust',          'InventoryController@adjustStock', ['auth']);
+
+        // Stock levels
+        $router->get('/stock',         'InventoryController@stockIndex', ['auth']);
+        $router->post('/stock/adjust', 'InventoryController@adjustStock', ['auth']);
 
         // Service Jobs
         $router->get('/jobs',               'ServiceController@indexJobs',  ['auth']);

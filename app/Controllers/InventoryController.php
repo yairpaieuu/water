@@ -17,33 +17,60 @@ class InventoryController extends BaseController
 {
     public function index(): void
     {
-        $request  = new Request();
-        $branchId = (int) $request->get('branch_id', 0);
+        $this->stockIndex();
+    }
 
-        $db       = Database::getInstance();
+    public function stockIndex(): void
+    {
+        $request      = new Request();
+        $branchFilter = (int) $request->get('branch_id', 0);
+
+        $db        = Database::getInstance();
         $inventory = new Inventory();
+        $branches  = (new Branch())->getActive();
 
-        if ($branchId > 0) {
-            $stock = $inventory->getByBranch($branchId);
-        } else {
-            $stock = $db->fetchAll(
-                "SELECT s.*, p.`name` AS product_name, p.`product_code`, p.`category`,
-                        p.`brand`, p.`model_number`, b.`name` AS branch_name
-                   FROM `inventory_stock` s
-                   JOIN `products`  p ON p.`id` = s.`product_id`
-                   JOIN `branches`  b ON b.`id` = s.`branch_id`
-               ORDER BY b.`name` ASC, p.`name` ASC"
-            );
+        // All active products
+        $allProducts = $db->fetchAll(
+            "SELECT p.*, COALESCE(MIN(s.`min_quantity`), 0) AS min_quantity
+               FROM `products` p
+               LEFT JOIN `inventory_stock` s ON s.`product_id` = p.`id`
+              WHERE p.`status` = 'active'
+              GROUP BY p.`id`
+              ORDER BY p.`name` ASC"
+        );
+
+        // All stock rows
+        $stockRows = $db->fetchAll(
+            "SELECT `product_id`, `branch_id`, `quantity` FROM `inventory_stock`"
+        );
+
+        // Index stock as [product_id][branch_id] => quantity
+        $stockMap = [];
+        foreach ($stockRows as $row) {
+            $stockMap[(int) $row['product_id']][(int) $row['branch_id']] = (int) $row['quantity'];
+        }
+
+        // Attach branch_stock sub-array to every product
+        $products = [];
+        foreach ($allProducts as $prod) {
+            $pid = (int) $prod['id'];
+            if ($branchFilter > 0) {
+                $prod['branch_stock'] = [$branchFilter => ($stockMap[$pid][$branchFilter] ?? 0)];
+            } else {
+                $prod['branch_stock'] = $stockMap[$pid] ?? [];
+            }
+            $products[] = $prod;
         }
 
         $this->render('inventory.index', [
-            'pageTitle' => 'Inventory',
-            'stock'     => $stock,
-            'branches'  => (new Branch())->getActive(),
-            'branchId'  => $branchId,
-            'user'      => Auth::user(),
-            'success'   => Session::getFlash('success'),
-            'error'     => Session::getFlash('error'),
+            'pageTitle'     => 'Stock',
+            'products'      => $products,
+            'branches'      => $branches,
+            'branchFilter'  => $branchFilter,
+            'lowStockItems' => $inventory->getLowStock(),
+            'user'          => Auth::user(),
+            'success'       => Session::getFlash('success'),
+            'error'         => Session::getFlash('error'),
         ]);
     }
 
