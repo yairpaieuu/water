@@ -33,7 +33,7 @@
     <!-- App CSS -->
     <link rel="stylesheet" href="/assets/css/app.css">
 </head>
-<body class="h-full bg-slate-100 font-sans antialiased" x-data="{ sidebarOpen: false, sidebarCollapsed: false }">
+<body class="h-full bg-slate-100 font-sans antialiased flex" x-data="{ sidebarOpen: false, sidebarCollapsed: false }">
 
 <!-- Mobile sidebar backdrop -->
 <div
@@ -193,7 +193,7 @@
 </aside>
 
 <!-- Main wrapper -->
-<div class="flex flex-col flex-1 min-h-screen lg:pl-64">
+<div class="flex flex-col flex-1 min-h-screen">
 
     <!-- Top navbar -->
     <header class="sticky top-0 z-10 flex items-center justify-between h-16 px-4 bg-white border-b border-slate-200 shadow-sm">
