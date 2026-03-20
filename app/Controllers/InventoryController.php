@@ -17,7 +17,16 @@ class InventoryController extends BaseController
 {
     public function index(): void
     {
-        $this->stockIndex();
+        $products = (new Product())->findAll([], 'name ASC');
+
+        $this->render('inventory.products', [
+            'pageTitle' => 'Products',
+            'products'  => $products,
+            'csrfField' => CSRF::field(),
+            'user'      => Auth::user(),
+            'success'   => Session::getFlash('success'),
+            'error'     => Session::getFlash('error'),
+        ]);
     }
 
     public function stockIndex(): void
