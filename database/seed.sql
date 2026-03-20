@@ -86,9 +86,9 @@ INSERT IGNORE INTO `employees` (`id`, `employee_code`, `first_name`, `last_name`
 (4, 'EMP-004', 'David',   'Staff',      'david@aquacrm.test',   '555-3004', 'Southport',  3, 'technical',  'Technician',        '2021-09-20', 'active', 1900.00, 5),
 (5, 'EMP-005', 'Eve',     'Admin',      'eve@aquacrm.test',     '555-3005', 'Cityville',  1, 'admin',      'Admin Officer',     '2022-02-01', 'active', 1800.00, NULL);
 
--- set branch managers
-UPDATE `branches` SET `manager_id` = 1 WHERE `id` = 1;
-UPDATE `branches` SET `manager_id` = 2 WHERE `id` = 2;
+-- set branch managers (JOIN ensures the UPDATE is silently skipped if the employee does not exist yet)
+UPDATE `branches` b JOIN `employees` e ON e.`id` = 1 SET b.`manager_id` = 1 WHERE b.`id` = 1;
+UPDATE `branches` b JOIN `employees` e ON e.`id` = 2 SET b.`manager_id` = 2 WHERE b.`id` = 2;
 
 -- ------------------------------------------------------------
 -- service_contracts
