@@ -29,28 +29,45 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. CLEAN – wipe all previous demo data
 --    Preserves: schema.sql admin user (id=1), the three base
 --    branches (id=1/2/3) and settings rows.
+--
+--    Using DELETE + AUTO_INCREMENT reset instead of TRUNCATE so
+--    the script works on all MySQL 8.x and MariaDB versions.
+--    TRUNCATE on InnoDB parent tables raises #1701 on some hosts
+--    even when FOREIGN_KEY_CHECKS = 0 is set.  DELETE is always
+--    safe once FK checks are disabled.
 -- ============================================================
 
-TRUNCATE TABLE `leave_requests`;
-TRUNCATE TABLE `attendance`;
-TRUNCATE TABLE `sale_items`;
-TRUNCATE TABLE `sales`;
-TRUNCATE TABLE `service_jobs`;
-TRUNCATE TABLE `service_contracts`;
-TRUNCATE TABLE `leads`;
-TRUNCATE TABLE `inventory_stock`;
-TRUNCATE TABLE `employees`;
-TRUNCATE TABLE `customers`;
-TRUNCATE TABLE `products`;
-TRUNCATE TABLE `service_types`;
+DELETE FROM `leave_requests`;
+DELETE FROM `attendance`;
+DELETE FROM `sale_items`;
+DELETE FROM `sales`;
+DELETE FROM `service_jobs`;
+DELETE FROM `service_contracts`;
+DELETE FROM `leads`;
+DELETE FROM `inventory_stock`;
+DELETE FROM `employees`;
+DELETE FROM `customers`;
+DELETE FROM `products`;
+DELETE FROM `service_types`;
 
 DELETE FROM `branches` WHERE `id` NOT IN (1, 2, 3);
 DELETE FROM `users`    WHERE `id`  != 1;
 
-ALTER TABLE `branches` AUTO_INCREMENT = 4;
-ALTER TABLE `users`    AUTO_INCREMENT = 2;
-
-SET FOREIGN_KEY_CHECKS = 1;
+-- Reset auto-increment counters so demo IDs start from 1
+ALTER TABLE `leave_requests`    AUTO_INCREMENT = 1;
+ALTER TABLE `attendance`        AUTO_INCREMENT = 1;
+ALTER TABLE `sale_items`        AUTO_INCREMENT = 1;
+ALTER TABLE `sales`             AUTO_INCREMENT = 1;
+ALTER TABLE `service_jobs`      AUTO_INCREMENT = 1;
+ALTER TABLE `service_contracts` AUTO_INCREMENT = 1;
+ALTER TABLE `leads`             AUTO_INCREMENT = 1;
+ALTER TABLE `inventory_stock`   AUTO_INCREMENT = 1;
+ALTER TABLE `employees`         AUTO_INCREMENT = 1;
+ALTER TABLE `customers`         AUTO_INCREMENT = 1;
+ALTER TABLE `products`          AUTO_INCREMENT = 1;
+ALTER TABLE `service_types`     AUTO_INCREMENT = 1;
+ALTER TABLE `branches`          AUTO_INCREMENT = 4;
+ALTER TABLE `users`             AUTO_INCREMENT = 2;
 
 -- ============================================================
 -- 2. BRANCHES
@@ -128,7 +145,7 @@ INSERT INTO `inventory_stock` (`product_id`, `branch_id`, `quantity`, `min_quant
 
 -- ============================================================
 -- 6. SERVICE TYPES
---    After the TRUNCATE above these must be re-inserted.
+--    After the DELETE above these must be re-inserted.
 --    IDs match schema.sql's auto-assigned order so that a
 --    fresh schema.sql + seed.sql run is fully consistent.
 -- ============================================================
