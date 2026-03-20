@@ -10,37 +10,48 @@ class DashboardController extends BaseController
 {
     public function index(): void
     {
-        $kpis = $this->fetchKpis();
+        $db = Database::getInstance();
+
+        // KPI scalars
+        $totalCustomers = $this->safeCount($db, 'customers');
+        $activeContracts = $this->safeCount($db, 'service_contracts', "`status` = 'active'");
+        $pendingJobs    = $this->safeCount($db, 'service_jobs', "`status` = 'pending'");
+        $monthlyRevenue = $this->safeSum(
+            $db, 'sales', 'total',
+            "`status` != 'cancelled' AND `payment_status` = 'paid'"
+            . " AND MONTH(`sale_date`) = MONTH(CURDATE()) AND YEAR(`sale_date`) = YEAR(CURDATE())"
+        );
+
+        // Low-stock count
+        $lowStockCount = $this->safeCount(
+            $db, 'inventory_stock', '`quantity` <= `min_quantity` AND `min_quantity` > 0'
+        );
+
+        // Last-12-months revenue chart data
+        $revenueChart = $this->fetchRevenueChart($db);
+
+        // Services due this week
+        $servicesDue = $this->fetchServicesDue($db);
+
+        // Recent jobs (last 5)
+        $recentJobs = $this->fetchRecentJobs($db);
+
+        // Recent sales (last 5)
+        $recentSales = $this->fetchRecentSales($db);
 
         $this->render('dashboard.index', [
             'pageTitle'      => 'Dashboard',
-            'kpis'           => $kpis,
             'user'           => Auth::user(),
-            'recentActivities' => $this->fetchRecentActivities(),
+            'totalCustomers' => $totalCustomers,
+            'activeContracts'=> $activeContracts,
+            'pendingJobs'    => $pendingJobs,
+            'monthlyRevenue' => $monthlyRevenue,
+            'revenueChart'   => $revenueChart,
+            'lowStockCount'  => $lowStockCount,
+            'servicesDue'    => $servicesDue,
+            'recentJobs'     => $recentJobs,
+            'recentSales'    => $recentSales,
         ]);
-    }
-
-    /**
-     * Fetch high-level KPI counts from the database.
-     * Each query uses a try/catch so a missing table never crashes the dashboard.
-     *
-     * @return array<string, int|string>
-     */
-    private function fetchKpis(): array
-    {
-        $db = Database::getInstance();
-
-        $totalCustomers  = $this->safeCount($db, 'customers');
-        $activeServices  = $this->safeCount($db, 'service_contracts', "`status` = 'active'");
-        $pendingJobs     = $this->safeCount($db, 'service_jobs', "`status` = 'pending'");
-        $monthlyRevenue  = $this->safeSum($db, 'sales', 'total', "`status` != 'cancelled' AND `payment_status` = 'paid' AND MONTH(`sale_date`) = MONTH(CURDATE()) AND YEAR(`sale_date`) = YEAR(CURDATE())");
-
-        return [
-            'total_customers' => $totalCustomers,
-            'active_services' => $activeServices,
-            'pending_jobs'    => $pendingJobs,
-            'monthly_revenue' => number_format($monthlyRevenue, 2),
-        ];
     }
 
     private function safeCount(Database $db, string $table, string $where = ''): int
@@ -69,20 +80,94 @@ class DashboardController extends BaseController
     }
 
     /**
-     * Fetch recent activities / audit log entries.
+     * Return last 12 months of revenue as [{month, total}, …] for the sparkline chart.
+     *
+     * @return array<int, array{month: string, total: float}>
+     */
+    private function fetchRevenueChart(Database $db): array
+    {
+        try {
+            $rows = $db->fetchAll(
+                "SELECT DATE_FORMAT(`sale_date`, '%b %Y') AS `month`,
+                        COALESCE(SUM(`total`), 0)         AS `total`
+                   FROM `sales`
+                  WHERE `status` != 'cancelled'
+                    AND `sale_date` >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                  GROUP BY YEAR(`sale_date`), MONTH(`sale_date`)
+                  ORDER BY YEAR(`sale_date`) ASC, MONTH(`sale_date`) ASC",
+                []
+            );
+            return array_map(
+                fn($r) => ['month' => (string)$r['month'], 'total' => (float)$r['total']],
+                $rows
+            );
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Fetch service jobs scheduled within the next 7 days.
      *
      * @return array<int, array<string, mixed>>
      */
-    private function fetchRecentActivities(): array
+    private function fetchServicesDue(Database $db): array
     {
         try {
-            $db = Database::getInstance();
             return $db->fetchAll(
-                "SELECT a.*, u.name AS user_name
-                   FROM `activity_log` a
-              LEFT JOIN `users` u ON u.id = a.user_id
-               ORDER BY a.created_at DESC
+                "SELECT j.id, j.job_type, j.scheduled_date,
+                        c.name AS customer_name
+                   FROM `service_jobs` j
+              LEFT JOIN `customers` c ON c.id = j.customer_id
+                  WHERE j.scheduled_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+                    AND j.status NOT IN ('completed','cancelled')
+                  ORDER BY j.scheduled_date ASC
                   LIMIT 10",
+                []
+            );
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Fetch the 5 most recently created service jobs.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchRecentJobs(Database $db): array
+    {
+        try {
+            return $db->fetchAll(
+                "SELECT j.id, j.job_type, j.status,
+                        c.name AS customer_name
+                   FROM `service_jobs` j
+              LEFT JOIN `customers` c ON c.id = j.customer_id
+                  ORDER BY j.created_at DESC
+                  LIMIT 5",
+                []
+            );
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Fetch the 5 most recently created sales.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchRecentSales(Database $db): array
+    {
+        try {
+            return $db->fetchAll(
+                "SELECT s.id, s.total, s.sale_date AS `date`,
+                        c.name AS customer_name
+                   FROM `sales` s
+              LEFT JOIN `customers` c ON c.id = s.customer_id
+                  WHERE s.status != 'cancelled'
+                  ORDER BY s.created_at DESC
+                  LIMIT 5",
                 []
             );
         } catch (\Throwable) {

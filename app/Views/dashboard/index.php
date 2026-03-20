@@ -144,8 +144,8 @@
 </div>
 <script>
 (function() {
-  const revenueData = <?= json_encode(is_array($monthlyRevenue) ? array_values(array_map(fn($m) => (float)($m['total'] ?? 0), $monthlyRevenue)) : []) ?>;
-  const labels = <?= json_encode(is_array($monthlyRevenue) ? array_values(array_map(fn($m) => $m['month'] ?? '', $monthlyRevenue)) : []) ?>;
+  const revenueData = <?= json_encode(array_values(array_map(fn($m) => (float)($m['total'] ?? 0), $revenueChart ?? []))) ?>;
+  const labels = <?= json_encode(array_values(array_map(fn($m) => $m['month'] ?? '', $revenueChart ?? []))) ?>;
   if (revenueData.length > 0) {
     new Chart(document.getElementById('revenueChart').getContext('2d'), {
       type: 'line',
