@@ -138,7 +138,7 @@
         <div x-data="{ open: <?= $groupActive ? 'true' : 'false' ?> }">
             <button @click="open = !open"
                     class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                           <?= $groupActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' ?>">
+                           <?= $groupActive ? 'bg-primary-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' ?>">
                 <span class="flex items-center gap-3">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <?= $group['icon'] ?>
@@ -155,7 +155,7 @@
                 <a href="<?= htmlspecialchars($child['href'], ENT_QUOTES, 'UTF-8') ?>"
                    class="block px-3 py-1.5 rounded-md text-sm transition-colors
                           <?= str_starts_with($currentUri, $child['href'])
-                                ? 'text-primary-400 font-medium'
+                                ? 'bg-primary-500/20 text-white font-semibold'
                                 : 'text-slate-400 hover:text-white hover:bg-slate-700' ?>">
                     <?= htmlspecialchars($child['label'], ENT_QUOTES, 'UTF-8') ?>
                 </a>
