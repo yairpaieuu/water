@@ -116,7 +116,7 @@ class DashboardController extends BaseController
         try {
             return $db->fetchAll(
                 "SELECT j.id, j.job_type, j.scheduled_date,
-                        c.name AS customer_name
+                        CONCAT(c.first_name, ' ', c.last_name) AS customer_name
                    FROM `service_jobs` j
               LEFT JOIN `customers` c ON c.id = j.customer_id
                   WHERE j.scheduled_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
@@ -140,7 +140,7 @@ class DashboardController extends BaseController
         try {
             return $db->fetchAll(
                 "SELECT j.id, j.job_type, j.status,
-                        c.name AS customer_name
+                        CONCAT(c.first_name, ' ', c.last_name) AS customer_name
                    FROM `service_jobs` j
               LEFT JOIN `customers` c ON c.id = j.customer_id
                   ORDER BY j.created_at DESC
@@ -162,7 +162,7 @@ class DashboardController extends BaseController
         try {
             return $db->fetchAll(
                 "SELECT s.id, s.total, s.sale_date AS `date`,
-                        c.name AS customer_name
+                        CONCAT(c.first_name, ' ', c.last_name) AS customer_name
                    FROM `sales` s
               LEFT JOIN `customers` c ON c.id = s.customer_id
                   WHERE s.status != 'cancelled'

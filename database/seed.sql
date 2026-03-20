@@ -219,4 +219,72 @@ INSERT IGNORE INTO `leave_requests` (`employee_id`, `leave_type`, `start_date`, 
 (7, 'sick',      '2025-11-03', '2025-11-03', 1, 'Not feeling well',        'approved',  1),
 (8, 'casual',    '2026-02-14', '2026-02-14', 1, 'Personal errand',         'pending',  NULL);
 
+-- ============================================================
+-- Dashboard demo data
+-- These records use relative dates (CURDATE() / DATE_ADD / DATE_SUB)
+-- so they will always appear in the correct dashboard sections
+-- no matter when the seed is run.
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- Additional customers (used by the new jobs and sales below)
+-- ------------------------------------------------------------
+INSERT IGNORE INTO `customers` (`id`, `customer_code`, `first_name`, `last_name`, `email`, `phone`, `address`, `city`, `state`, `postal_code`, `branch_id`, `source`, `status`, `created_by`) VALUES
+(6,  'CUST-0006', 'Linda',   'Chen',    'linda.chen@example.com',    '555-1006', '3 Jasmine Close',  'Cityville',  'Central State', '10006', 1, 'referral',        'active', 1),
+(7,  'CUST-0007', 'Omar',    'Hassan',  'omar.hassan@example.com',   '555-1007', '20 Mango Way',     'Northtown',  'Central State', '10007', 2, 'online',          'active', 1),
+(8,  'CUST-0008', 'Priya',   'Sharma',  'priya.sharma@example.com',  '555-1008', '55 Rose Garden',   'Southport',  'Central State', '10008', 3, 'walk_in',         'active', 1),
+(9,  'CUST-0009', 'Jack',    'Robinson','jack.robinson@example.com', '555-1009', '8 Timber Lane',    'Eastwick',   'Eastern State', '10009', 4, 'lead_conversion', 'active', 1),
+(10, 'CUST-0010', 'Fiona',   'Ng',      'fiona.ng@example.com',      '555-1010', '12 Orchid Court',  'Westburg',   'Western State', '10010', 5, 'site_survey',     'active', 1);
+
+-- ------------------------------------------------------------
+-- Additional service_contracts for the new customers
+-- next_service_date is set relative to today so the contracts
+-- line up naturally with the jobs below.
+-- ------------------------------------------------------------
+INSERT IGNORE INTO `service_contracts` (`id`, `contract_code`, `customer_id`, `product_id`, `service_type_id`, `branch_id`, `installation_date`, `next_service_date`, `status`, `serial_number`, `assigned_technician_id`, `created_by`) VALUES
+(6,  'CON-0006', 6,  1, 1, 1, DATE_SUB(CURDATE(), INTERVAL 90  DAY), DATE_ADD(CURDATE(), INTERVAL 2  DAY), 'active', 'SN-RO5-10006', 2, 1),
+(7,  'CON-0007', 7,  2, 2, 2, DATE_SUB(CURDATE(), INTERVAL 180 DAY), DATE_ADD(CURDATE(), INTERVAL 1  DAY), 'active', 'SN-RO7-10007', 2, 1),
+(8,  'CON-0008', 8,  1, 3, 3, DATE_SUB(CURDATE(), INTERVAL 365 DAY), DATE_ADD(CURDATE(), INTERVAL 4  DAY), 'active', 'SN-RO5-10008', 4, 1),
+(9,  'CON-0009', 9,  2, 1, 4, DATE_SUB(CURDATE(), INTERVAL 60  DAY), DATE_ADD(CURDATE(), INTERVAL 5  DAY), 'active', 'SN-RO7-10009', 4, 1),
+(10, 'CON-0010', 10, 1, 2, 5, DATE_SUB(CURDATE(), INTERVAL 150 DAY), DATE_ADD(CURDATE(), INTERVAL 6  DAY), 'active', 'SN-RO5-10010', 2, 1);
+
+-- ------------------------------------------------------------
+-- service_jobs – scheduled THIS WEEK (relative to CURDATE())
+-- Populates:
+--   "Services Due This Week"  – scheduled_date within next 7 days,
+--                               status not completed/cancelled
+--   "Recent Jobs"             – created_at = NOW() so these sort
+--                               to the top of the last-5 list
+-- ------------------------------------------------------------
+INSERT IGNORE INTO `service_jobs` (`id`, `job_code`, `contract_id`, `customer_id`, `branch_id`, `job_type`, `status`, `priority`, `scheduled_date`, `scheduled_time`, `assigned_to`, `notes`, `cost`, `created_by`) VALUES
+(6,  'JOB-0006', 6,  6,  1, 'maintenance',  'pending',     'normal', CURDATE(),                           '09:00:00', 2, 'Quarterly filter flush – due today',              450.00, 1),
+(7,  'JOB-0007', 7,  7,  2, 'maintenance',  'assigned',    'high',   DATE_ADD(CURDATE(), INTERVAL 1 DAY), '10:30:00', 2, 'Half-yearly deep clean – due tomorrow',           700.00, 1),
+(8,  'JOB-0008', 8,  8,  3, 'repair',       'pending',     'urgent', DATE_ADD(CURDATE(), INTERVAL 2 DAY), '08:00:00', 4, 'Customer reports low flow rate',                   80.00, 1),
+(9,  'JOB-0009', 9,  9,  4, 'installation', 'assigned',    'normal', DATE_ADD(CURDATE(), INTERVAL 4 DAY), '11:00:00', 4, 'New RO-7 Pro installation at customer premises',  150.00, 1),
+(10, 'JOB-0010', 10, 10, 5, 'survey',       'in_progress', 'low',    DATE_ADD(CURDATE(), INTERVAL 6 DAY), '14:00:00', 2, 'Pre-installation site survey',                     50.00, 1);
+
+-- ------------------------------------------------------------
+-- sales – current-week dates (relative)
+-- Populates:
+--   "Recent Sales"  – created_at = NOW() so these sort to the
+--                     top of the last-5 list; status != cancelled
+--   Revenue chart   – sale_date within last 12 months
+-- ------------------------------------------------------------
+INSERT IGNORE INTO `sales` (`id`, `sale_code`, `customer_id`, `branch_id`, `sale_date`, `status`, `payment_status`, `subtotal`, `discount`, `tax`, `total`, `paid_amount`, `notes`, `created_by`) VALUES
+(6,  'SALE-0006', 6,  1, CURDATE(),                           'delivered', 'paid',    150.00,  0.00, 0.00, 150.00, 150.00, 'RO-5 replacement unit',                    1),
+(7,  'SALE-0007', 7,  2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'confirmed', 'partial', 220.00,  0.00, 0.00, 220.00, 110.00, 'RO-7 Pro upgrade – first instalment paid', 1),
+(8,  'SALE-0008', 8,  3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 'delivered', 'paid',     57.00,  0.00, 0.00,  57.00,  57.00, 'Membrane + pre-filter set replacement',    1),
+(9,  'SALE-0009', 9,  4, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 'confirmed', 'pending', 220.00, 10.00, 0.00, 210.00,   0.00, 'Commercial unit – pending payment',        1),
+(10, 'SALE-0010', 10, 5, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 'delivered', 'paid',     36.00,  0.00, 0.00,  36.00,  36.00, 'Anti-scale chemical treatment pack',       1);
+
+-- sale_items for the new sales
+INSERT IGNORE INTO `sale_items` (`sale_id`, `product_id`, `quantity`, `unit_price`, `discount`, `total`) VALUES
+(6,  1, 1, 150.00,  0.00, 150.00),
+(7,  2, 1, 220.00,  0.00, 220.00),
+(8,  3, 1,  35.00,  0.00,  35.00),
+(8,  4, 1,  22.00,  0.00,  22.00),
+(9,  2, 1, 220.00, 10.00, 210.00),
+(10, 5, 1,  18.00,  0.00,  18.00),
+(10, 4, 1,  22.00,  4.00,  18.00);
+
 SET FOREIGN_KEY_CHECKS = 1;
