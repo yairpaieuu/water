@@ -1,0 +1,7 @@
+Options -Indexes
+
+RewriteEngine On
+
+# Redirect all requests to public/ directory
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ /public/$1 [L,QSA]
