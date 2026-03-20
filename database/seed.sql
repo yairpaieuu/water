@@ -1,7 +1,7 @@
 -- ============================================================
 -- AquaCRM – Demo Seed Data
 -- Run AFTER schema.sql has been executed.
--- Provides 5 demo rows for every main process table.
+-- Provides comprehensive demo data for every main process table.
 -- ============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -24,7 +24,10 @@ INSERT IGNORE INTO `users` (`id`, `name`, `email`, `password`, `role`, `branch_i
 (2, 'Alice Manager',   'alice@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'manager',     1, 'active'),
 (3, 'Bob Technician',  'bob@aquacrm.test',      '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'technician',  2, 'active'),
 (4, 'Carol Sales',     'carol@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'staff',       1, 'active'),
-(5, 'David Staff',     'david@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'staff',       3, 'active');
+(5, 'David Staff',     'david@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'staff',       3, 'active'),
+(6, 'Frank Costa',     'frank@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'manager',     3, 'active'),
+(7, 'Grace Lee',       'grace@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'manager',     4, 'active'),
+(8, 'Henry Patel',     'henry@aquacrm.test',    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'manager',     5, 'active');
 
 -- ------------------------------------------------------------
 -- customers
@@ -57,14 +60,34 @@ INSERT IGNORE INTO `products` (`id`, `product_code`, `name`, `description`, `cat
 (5, 'PRD-005', 'Anti-Scale Chemical 5L', 'Liquid anti-scale treatment for water systems',        'chemical',    'ChemClear',  'AS-5L',       8.00,   18.00, NULL, 'active');
 
 -- ------------------------------------------------------------
--- inventory_stock  (branch 1 & 2)
+-- inventory_stock  (all 5 products × all 5 branches)
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `inventory_stock` (`product_id`, `branch_id`, `quantity`, `min_quantity`) VALUES
 (1, 1, 12, 3),
 (2, 1,  8, 2),
 (3, 1, 40, 10),
 (4, 1, 25, 5),
-(5, 2, 15, 5);
+(5, 1, 20, 5),
+(1, 2,  8, 2),
+(2, 2,  5, 2),
+(3, 2, 30, 8),
+(4, 2, 20, 5),
+(5, 2, 15, 5),
+(1, 3,  6, 2),
+(2, 3,  4, 1),
+(3, 3, 25, 6),
+(4, 3, 18, 4),
+(5, 3, 12, 3),
+(1, 4, 10, 2),
+(2, 4,  6, 1),
+(3, 4, 35, 8),
+(4, 4, 22, 5),
+(5, 4, 18, 4),
+(1, 5,  7, 2),
+(2, 5,  3, 1),
+(3, 5, 28, 7),
+(4, 5, 15, 4),
+(5, 5, 10, 3);
 
 -- ------------------------------------------------------------
 -- service_types
@@ -84,11 +107,17 @@ INSERT IGNORE INTO `employees` (`id`, `employee_code`, `first_name`, `last_name`
 (2, 'EMP-002', 'Bob',     'Technician', 'bob@aquacrm.test',     '555-3002', 'Northtown',  2, 'technical',  'Senior Technician', '2020-06-01', 'active', 2200.00, 3),
 (3, 'EMP-003', 'Carol',   'Sales',      'carol@aquacrm.test',   '555-3003', 'Cityville',  1, 'sales',      'Sales Executive',   '2021-03-10', 'active', 2000.00, 4),
 (4, 'EMP-004', 'David',   'Staff',      'david@aquacrm.test',   '555-3004', 'Southport',  3, 'technical',  'Technician',        '2021-09-20', 'active', 1900.00, 5),
-(5, 'EMP-005', 'Eve',     'Admin',      'eve@aquacrm.test',     '555-3005', 'Cityville',  1, 'admin',      'Admin Officer',     '2022-02-01', 'active', 1800.00, NULL);
+(5, 'EMP-005', 'Eve',     'Admin',      'eve@aquacrm.test',     '555-3005', 'Cityville',  1, 'admin',      'Admin Officer',     '2022-02-01', 'active', 1800.00, NULL),
+(6, 'EMP-006', 'Frank',   'Costa',      'frank@aquacrm.test',   '555-3006', 'Southport',  3, 'management', 'Branch Manager',    '2021-01-10', 'active', 3200.00, 6),
+(7, 'EMP-007', 'Grace',   'Lee',        'grace@aquacrm.test',   '555-3007', 'Eastwick',   4, 'management', 'Branch Manager',    '2021-06-15', 'active', 3200.00, 7),
+(8, 'EMP-008', 'Henry',   'Patel',      'henry@aquacrm.test',   '555-3008', 'Westburg',   5, 'management', 'Branch Manager',    '2022-03-01', 'active', 3200.00, 8);
 
 -- set branch managers (JOIN ensures the UPDATE is silently skipped if the employee does not exist yet)
 UPDATE `branches` b JOIN `employees` e ON e.`id` = 1 SET b.`manager_id` = 1 WHERE b.`id` = 1;
 UPDATE `branches` b JOIN `employees` e ON e.`id` = 2 SET b.`manager_id` = 2 WHERE b.`id` = 2;
+UPDATE `branches` b JOIN `employees` e ON e.`id` = 6 SET b.`manager_id` = 6 WHERE b.`id` = 3;
+UPDATE `branches` b JOIN `employees` e ON e.`id` = 7 SET b.`manager_id` = 7 WHERE b.`id` = 4;
+UPDATE `branches` b JOIN `employees` e ON e.`id` = 8 SET b.`manager_id` = 8 WHERE b.`id` = 5;
 
 -- ------------------------------------------------------------
 -- service_contracts
@@ -133,14 +162,49 @@ INSERT IGNORE INTO `sale_items` (`sale_id`, `product_id`, `quantity`, `unit_pric
 (5, 4, 1,  22.00, 4.00,  18.00);
 
 -- ------------------------------------------------------------
--- attendance  (5 records for EMP-001 over last 5 working days)
+-- attendance  (5 working days × 8 employees)
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `attendance` (`employee_id`, `date`, `check_in`, `check_out`, `status`) VALUES
 (1, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '08:55:00', '17:05:00', 'present'),
 (1, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '09:10:00', '17:00:00', 'late'),
+(1, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '08:50:00', '17:00:00', 'present'),
+(1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '09:00:00', '17:00:00', 'present'),
+(1, CURDATE(),                           '09:05:00', '17:00:00', 'present'),
 (2, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '09:00:00', '17:00:00', 'present'),
 (2, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '09:00:00', '17:00:00', 'present'),
-(3, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '08:45:00', '17:15:00', 'present');
+(2, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '09:00:00', '17:00:00', 'present'),
+(2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '09:15:00', '17:00:00', 'late'),
+(2, CURDATE(),                           '09:00:00', '17:00:00', 'present'),
+(3, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '08:45:00', '17:15:00', 'present'),
+(3, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '09:00:00', '17:00:00', 'present'),
+(3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '09:00:00', '17:00:00', 'present'),
+(3, DATE_SUB(CURDATE(), INTERVAL 1 DAY), NULL,        NULL,       'absent'),
+(3, CURDATE(),                           '08:30:00', '17:00:00', 'present'),
+(4, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '09:00:00', '17:00:00', 'present'),
+(4, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '09:00:00', '17:00:00', 'present'),
+(4, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '09:30:00', '17:00:00', 'late'),
+(4, DATE_SUB(CURDATE(), INTERVAL 1 DAY), NULL,        NULL,       'absent'),
+(4, CURDATE(),                           '09:00:00', '17:00:00', 'present'),
+(5, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '08:30:00', '17:00:00', 'present'),
+(5, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '08:30:00', '17:00:00', 'present'),
+(5, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '08:45:00', '17:00:00', 'present'),
+(5, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '09:00:00', '17:00:00', 'present'),
+(5, CURDATE(),                           '08:30:00', '17:00:00', 'present'),
+(6, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '09:00:00', '17:00:00', 'present'),
+(6, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '09:00:00', '17:00:00', 'present'),
+(6, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '09:00:00', '17:00:00', 'present'),
+(6, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '09:10:00', '17:00:00', 'late'),
+(6, CURDATE(),                           '09:00:00', '17:00:00', 'present'),
+(7, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '08:45:00', '17:00:00', 'present'),
+(7, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '08:45:00', '17:00:00', 'present'),
+(7, DATE_SUB(CURDATE(), INTERVAL 2 DAY), NULL,        NULL,       'absent'),
+(7, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '08:45:00', '17:00:00', 'present'),
+(7, CURDATE(),                           '08:45:00', '17:00:00', 'present'),
+(8, DATE_SUB(CURDATE(), INTERVAL 4 DAY), '09:00:00', '17:00:00', 'present'),
+(8, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '09:00:00', '17:00:00', 'present'),
+(8, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '09:00:00', '17:00:00', 'present'),
+(8, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '09:00:00', '17:00:00', 'present'),
+(8, CURDATE(),                           '09:00:00', '17:00:00', 'present');
 
 -- ------------------------------------------------------------
 -- leave_requests
@@ -150,6 +214,9 @@ INSERT IGNORE INTO `leave_requests` (`employee_id`, `leave_type`, `start_date`, 
 (3, 'sick',      '2025-07-21', '2025-07-21', 1, 'Fever',                   'approved',  1),
 (4, 'casual',    '2025-09-10', '2025-09-10', 1, 'Personal errand',         'pending',  NULL),
 (5, 'annual',    '2025-10-01', '2025-10-03', 3, 'Annual leave',            'pending',  NULL),
-(1, 'maternity', '2026-01-15', '2026-04-15',60, 'Maternity leave',         'approved',  1);
+(1, 'maternity', '2026-01-15', '2026-04-15',60, 'Maternity leave',         'approved',  1),
+(6, 'annual',    '2025-12-20', '2025-12-24', 5, 'Year-end holiday',        'approved',  1),
+(7, 'sick',      '2025-11-03', '2025-11-03', 1, 'Not feeling well',        'approved',  1),
+(8, 'casual',    '2026-02-14', '2026-02-14', 1, 'Personal errand',         'pending',  NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
