@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Inventory Report'; ob_start(); ?>
+<?php $pageTitle = 'Inventory Report'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="space-y-6">
   <h2 class="text-xl font-bold text-slate-800">Inventory Report</h2>
@@ -81,4 +81,3 @@
     <?php endif; ?>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Contract #' . e($contract['id']); ob_start(); ?>
+<?php $pageTitle = 'Contract #' . e($contract['id']); ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="max-w-5xl mx-auto space-y-6">
   <div class="flex items-center justify-between">
@@ -84,4 +84,3 @@
     <?php endif; ?>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

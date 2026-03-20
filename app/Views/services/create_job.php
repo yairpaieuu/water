@@ -1,4 +1,3 @@
-<?php ob_start(); ?>
 <div class="max-w-3xl mx-auto space-y-6">
     <div class="flex items-center gap-3">
         <a href="/jobs" class="text-slate-500 hover:text-slate-700">
@@ -124,4 +123,3 @@
         </div>
     </form>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

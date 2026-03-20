@@ -4,7 +4,6 @@ $typeColors   = ['installation'=>'bg-purple-100 text-purple-800','maintenance'=>
 $status = $job['status'] ?? 'pending';
 $type   = $job['job_type'] ?? 'maintenance';
 ?>
-<?php ob_start(); ?>
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-wrap items-center gap-3">
@@ -124,4 +123,3 @@ $type   = $job['job_type'] ?? 'maintenance';
         <?php endif; ?>
     </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

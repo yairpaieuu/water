@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Settings'; ob_start(); ?>
+<?php $pageTitle = 'Settings'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="max-w-4xl mx-auto" x-data="{ tab: 'general' }">
   <h2 class="text-xl font-bold text-slate-800 mb-6">Settings</h2>
@@ -156,4 +156,3 @@
     </div>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

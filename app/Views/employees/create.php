@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Add Employee'; ob_start(); ?>
+<?php $pageTitle = 'Add Employee'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="max-w-3xl mx-auto">
   <div class="flex items-center justify-between mb-6">
@@ -100,4 +100,3 @@
     </form>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

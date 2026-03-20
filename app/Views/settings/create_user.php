@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Create User'; ob_start(); ?>
+<?php $pageTitle = 'Create User'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="max-w-2xl mx-auto">
   <div class="flex items-center justify-between mb-6">
@@ -69,4 +69,3 @@
     </form>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

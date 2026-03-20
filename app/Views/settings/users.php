@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Users'; ob_start(); ?>
+<?php $pageTitle = 'Users'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="space-y-6">
   <div class="flex items-center justify-between">
@@ -88,4 +88,3 @@
     </div>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

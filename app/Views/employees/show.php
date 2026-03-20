@@ -1,4 +1,4 @@
-<?php $pageTitle = e(($employee['first_name'] ?? '') . ' ' . ($employee['last_name'] ?? '')); ob_start(); ?>
+<?php $pageTitle = e(($employee['first_name'] ?? '') . ' ' . ($employee['last_name'] ?? '')); ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <?php
   $initials = strtoupper(mb_substr($employee['first_name'] ?? 'E', 0, 1) . mb_substr($employee['last_name'] ?? '', 0, 1));
@@ -82,4 +82,3 @@
     <?php endif; ?>
   </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

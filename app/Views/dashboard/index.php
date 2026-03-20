@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Dashboard'; ob_start(); ?>
+<?php $pageTitle = 'Dashboard'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="space-y-6">
   <h2 class="text-xl font-bold text-slate-800">Dashboard</h2>
@@ -174,4 +174,3 @@
   }
 })();
 </script>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

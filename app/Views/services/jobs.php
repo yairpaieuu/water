@@ -28,7 +28,6 @@ foreach ($jobs as $j) {
     if (!in_array($j['status'], ['completed','cancelled']) && !empty($j['scheduled_date']) && $j['scheduled_date'] < $today) $overdue++;
 }
 ?>
-<?php ob_start(); ?>
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
@@ -196,4 +195,3 @@ foreach ($jobs as $j) {
         </div>
     </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

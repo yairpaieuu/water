@@ -3,7 +3,6 @@ $today = date('Y-m-d');
 $sevenDays = date('Y-m-d', strtotime('+7 days'));
 $dueSoon = array_filter($contracts, fn($c) => !empty($c['next_service_date']) && $c['next_service_date'] >= $today && $c['next_service_date'] <= $sevenDays && ($c['status'] ?? '') === 'active');
 ?>
-<?php ob_start(); ?>
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
@@ -97,4 +96,3 @@ $dueSoon = array_filter($contracts, fn($c) => !empty($c['next_service_date']) &&
         <?php endif; ?>
     </div>
 </div>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>

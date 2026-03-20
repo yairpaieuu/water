@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Sales Report'; ob_start(); ?>
+<?php $pageTitle = 'Sales Report'; ?>
 <?php include VIEW_PATH . '/partials/flash.php'; ?>
 <div class="space-y-6">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -115,4 +115,3 @@ new Chart(ctx, {
   }
 });
 </script>
-<?php $content = ob_get_clean(); include VIEW_PATH . '/layouts/app.php'; ?>
