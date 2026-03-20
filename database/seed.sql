@@ -54,11 +54,11 @@ INSERT IGNORE INTO `leads` (`id`, `lead_code`, `first_name`, `last_name`, `email
 -- products
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `products` (`id`, `product_code`, `name`, `description`, `category`, `brand`, `model_number`, `purchase_price`, `selling_price`, `service_interval_months`, `status`) VALUES
-(1, 'PRD-001', 'AquaPure RO-5',          '5-stage reverse osmosis purifier for domestic use',   'purifier',    'AquaPure',   'RO-5-2024',  85.00,  150.00, 6,    'active'),
-(2, 'PRD-002', 'AquaPure RO-7 Pro',      '7-stage RO purifier with UV sterilisation',           'purifier',    'AquaPure',   'RO-7-PRO',  120.00,  220.00, 6,    'active'),
-(3, 'PRD-003', 'Membrane Filter 50GPD',  'Replacement RO membrane, 50 gallons per day',         'spare_part',  'FilterMax',  'MEM-50GPD',  18.00,   35.00, NULL, 'active'),
-(4, 'PRD-004', 'Pre-Filter Set (3-pack)','Sediment + carbon block + carbon granule set',         'spare_part',  'FilterMax',  'PRE-3P',     12.00,   22.00, NULL, 'active'),
-(5, 'PRD-005', 'Anti-Scale Chemical 5L', 'Liquid anti-scale treatment for water systems',        'chemical',    'ChemClear',  'AS-5L',       8.00,   18.00, NULL, 'active');
+(1, 'PRD-001', 'Domestic Water Purifier',       'Domestic RO water purifier for residential use (D-series)',        'purifier',   'AquaPure', 'D-SERIES',   85.00,  150.00,  6,    'active'),
+(2, 'PRD-002', 'S1 Commercial Water Purifier',  'S1-series RO purifier for semi-commercial and commercial use',     'purifier',   'AquaPure', 'S1-SERIES', 120.00,  220.00, 12,    'active'),
+(3, 'PRD-003', 'Membrane Filter 50GPD',         'Replacement RO membrane, 50 gallons per day',                     'spare_part', 'FilterMax', 'MEM-50GPD',  18.00,   35.00, NULL, 'active'),
+(4, 'PRD-004', 'Pre-Filter Set (3-pack)',        'Sediment + carbon block + carbon granule set',                    'spare_part', 'FilterMax', 'PRE-3P',     12.00,   22.00, NULL, 'active'),
+(5, 'PRD-005', 'Anti-Scale Chemical 5L',         'Liquid anti-scale treatment for water systems',                   'chemical',   'ChemClear', 'AS-5L',       8.00,   18.00, NULL, 'active');
 
 -- ------------------------------------------------------------
 -- inventory_stock  (all 5 products × all 5 branches)
@@ -92,13 +92,27 @@ INSERT IGNORE INTO `inventory_stock` (`product_id`, `branch_id`, `quantity`, `mi
 
 -- ------------------------------------------------------------
 -- service_types
+-- Machine type / service interval codes used by this business:
+--   D3M   Domestic  3-month service
+--   D6M   Domestic  6-month service
+--   D9M   Domestic  9-month service
+--   D12M  Domestic 12-month service
+--   S16M  S1 Commercial  6-month service
+--   S112M S1 Commercial 12-month service
+--   S118M S1 Commercial 18-month service
+--   S124M S1 Commercial 24-month service
+-- IDs 1-8 match the order inserted by schema.sql so that
+-- INSERT IGNORE is a safe no-op when schema.sql ran first.
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `service_types` (`id`, `code`, `name`, `description`, `interval_months`, `category`, `price`) VALUES
-(1, 'DOM-Q', 'Domestic Quarterly Service', 'Full filter check and membrane flush every 3 months', 3, 'domestic',   450.00),
-(2, 'DOM-H', 'Domestic Half-Yearly Service','Deep clean and filter replacement every 6 months',   6, 'domestic',   700.00),
-(3, 'DOM-A', 'Domestic Annual Service',    'Annual overhaul with membrane and all filters',       12, 'domestic', 1200.00),
-(4, 'COM-Q', 'Commercial Quarterly',       'Commercial-grade quarterly service',                   3, 'commercial',900.00),
-(5, 'COM-A', 'Commercial Annual',          'Full commercial annual maintenance package',          12, 'commercial',2500.00);
+(1, 'D3M',   'Domestic 3 Month',   'Domestic service every 3 months',                  3,  'domestic',   1500.00),
+(2, 'D6M',   'Domestic 6 Month',   'Domestic service every 6 months',                  6,  'domestic',   2500.00),
+(3, 'D9M',   'Domestic 9 Month',   'Domestic service every 9 months',                  9,  'domestic',   3200.00),
+(4, 'D12M',  'Domestic 12 Month',  'Domestic service every 12 months',                 12, 'domestic',   4000.00),
+(5, 'S16M',  'S1 6 Month',         'S1 commercial service every 6 months',             6,  'commercial', 5000.00),
+(6, 'S112M', 'S1 12 Month',        'S1 commercial service every 12 months',            12, 'commercial', 8500.00),
+(7, 'S118M', 'S1 18 Month',        'S1 commercial service every 18 months',            18, 'commercial', 11000.00),
+(8, 'S124M', 'S1 24 Month',        'S1 commercial service every 24 months',            24, 'commercial', 14000.00);
 
 -- ------------------------------------------------------------
 -- employees
@@ -124,31 +138,31 @@ UPDATE `branches` b JOIN `employees` e ON e.`id` = 8 SET b.`manager_id` = 8 WHER
 -- service_contracts
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `service_contracts` (`id`, `contract_code`, `customer_id`, `product_id`, `service_type_id`, `branch_id`, `installation_date`, `next_service_date`, `status`, `serial_number`, `assigned_technician_id`, `created_by`) VALUES
-(1, 'CON-0001', 1, 1, 1, 1, '2025-01-10', '2025-10-10', 'active',  'SN-RO5-10001', 2, 1),
-(2, 'CON-0002', 2, 2, 2, 2, '2025-02-15', '2025-08-15', 'active',  'SN-RO7-10002', 2, 1),
-(3, 'CON-0003', 3, 1, 3, 3, '2024-11-20', '2025-11-20', 'active',  'SN-RO5-10003', 4, 1),
-(4, 'CON-0004', 4, 2, 1, 4, '2025-03-01', '2025-12-01', 'active',  'SN-RO7-10004', 4, 1),
-(5, 'CON-0005', 5, 1, 2, 5, '2025-04-05', '2025-10-05', 'active',  'SN-RO5-10005', 2, 1);
+(1, 'CON-0001', 1, 1, 1, 1, '2025-01-10', '2025-04-10', 'active',  'SN-DOM-10001', 2, 1),  -- D3M  domestic  3-month
+(2, 'CON-0002', 2, 2, 5, 2, '2025-02-15', '2025-08-15', 'active',  'SN-S1C-10002', 2, 1),  -- S16M  S1 commercial  6-month
+(3, 'CON-0003', 3, 1, 4, 3, '2024-11-20', '2025-11-20', 'active',  'SN-DOM-10003', 4, 1),  -- D12M domestic 12-month
+(4, 'CON-0004', 4, 2, 6, 4, '2025-03-01', '2026-03-01', 'active',  'SN-S1C-10004', 4, 1),  -- S112M S1 commercial 12-month
+(5, 'CON-0005', 5, 1, 2, 5, '2025-04-05', '2025-10-05', 'active',  'SN-DOM-10005', 2, 1);  -- D6M  domestic  6-month
 
 -- ------------------------------------------------------------
 -- service_jobs
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `service_jobs` (`id`, `job_code`, `contract_id`, `customer_id`, `branch_id`, `job_type`, `status`, `priority`, `scheduled_date`, `scheduled_time`, `assigned_to`, `notes`, `cost`, `created_by`) VALUES
-(1, 'JOB-0001', 1, 1, 1, 'maintenance',   'completed',   'normal', '2025-07-10', '09:00:00', 2, 'Quarterly filter flush completed',        450.00, 1),
-(2, 'JOB-0002', 2, 2, 2, 'maintenance',   'in_progress', 'normal', '2025-08-15', '10:00:00', 2, 'Half-yearly deep clean in progress',      700.00, 1),
-(3, 'JOB-0003', 3, 3, 3, 'installation',  'completed',   'high',   '2024-11-20', '08:30:00', 4, 'New unit installed successfully',         150.00, 1),
-(4, 'JOB-0004', 4, 4, 4, 'repair',        'pending',     'urgent', '2025-09-01', '11:00:00', 4, 'Customer reports low pressure issue',       80.00, 1),
-(5, 'JOB-0005', 5, 5, 5, 'survey',        'assigned',    'low',    '2025-09-05', '14:00:00', 2, 'Pre-service site survey scheduled',         50.00, 1);
+(1, 'JOB-0001', 1, 1, 1, 'maintenance',   'completed',   'normal', '2025-01-10', '09:00:00', 2, 'D3M domestic 3-month service completed – filter flush and membrane check',  450.00, 1),
+(2, 'JOB-0002', 2, 2, 2, 'maintenance',   'in_progress', 'normal', '2025-08-15', '10:00:00', 2, 'S16M S1 6-month commercial service in progress – deep clean and filter check', 700.00, 1),
+(3, 'JOB-0003', 3, 3, 3, 'installation',  'completed',   'high',   '2024-11-20', '08:30:00', 4, 'Domestic purifier installed – D12M annual service plan activated',           150.00, 1),
+(4, 'JOB-0004', 4, 4, 4, 'repair',        'pending',     'urgent', '2025-09-01', '11:00:00', 4, 'Customer reports low pressure – S1 commercial unit inspection required',       80.00, 1),
+(5, 'JOB-0005', 5, 5, 5, 'survey',        'assigned',    'low',    '2025-09-05', '14:00:00', 2, 'Pre-installation site survey for D6M domestic service plan',                   50.00, 1);
 
 -- ------------------------------------------------------------
 -- sales
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `sales` (`id`, `sale_code`, `customer_id`, `branch_id`, `sale_date`, `status`, `payment_status`, `subtotal`, `discount`, `tax`, `total`, `paid_amount`, `notes`, `created_by`) VALUES
-(1, 'SALE-0001', 1, 1, '2025-01-10', 'delivered',  'paid',     150.00,  0.00, 0.00, 150.00, 150.00, 'RO-5 unit purchase on installation day', 1),
-(2, 'SALE-0002', 2, 2, '2025-02-15', 'delivered',  'paid',     220.00,  0.00, 0.00, 220.00, 220.00, 'RO-7 Pro sale',                          1),
-(3, 'SALE-0003', 3, 3, '2025-04-20', 'confirmed',  'partial',   57.00,  5.00, 0.00,  52.00,  30.00, 'Spare parts order',                      1),
-(4, 'SALE-0004', 4, 4, '2025-06-01', 'quotation',  'pending',  220.00, 10.00, 0.00, 210.00,   0.00, 'Quotation pending approval',             1),
-(5, 'SALE-0005', 5, 5, '2025-07-15', 'confirmed',  'paid',      36.00,  0.00, 0.00,  36.00,  36.00, 'Chemical and filter set sale',           1);
+(1, 'SALE-0001', 1, 1, '2025-01-10', 'delivered',  'paid',     150.00,  0.00, 0.00, 150.00, 150.00, 'Domestic Water Purifier unit purchase on installation day', 1),
+(2, 'SALE-0002', 2, 2, '2025-02-15', 'delivered',  'paid',     220.00,  0.00, 0.00, 220.00, 220.00, 'S1 Commercial Water Purifier unit sale',                   1),
+(3, 'SALE-0003', 3, 3, '2025-04-20', 'confirmed',  'partial',   57.00,  5.00, 0.00,  52.00,  30.00, 'Spare parts order',                                        1),
+(4, 'SALE-0004', 4, 4, '2025-06-01', 'quotation',  'pending',  220.00, 10.00, 0.00, 210.00,   0.00, 'S1 Commercial Water Purifier quotation pending approval',  1),
+(5, 'SALE-0005', 5, 5, '2025-07-15', 'confirmed',  'paid',      36.00,  0.00, 0.00,  36.00,  36.00, 'Chemical and filter set sale',                             1);
 
 -- ------------------------------------------------------------
 -- sale_items
@@ -243,11 +257,11 @@ INSERT IGNORE INTO `customers` (`id`, `customer_code`, `first_name`, `last_name`
 -- line up naturally with the jobs below.
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `service_contracts` (`id`, `contract_code`, `customer_id`, `product_id`, `service_type_id`, `branch_id`, `installation_date`, `next_service_date`, `status`, `serial_number`, `assigned_technician_id`, `created_by`) VALUES
-(6,  'CON-0006', 6,  1, 1, 1, DATE_SUB(CURDATE(), INTERVAL 90  DAY), DATE_ADD(CURDATE(), INTERVAL 2  DAY), 'active', 'SN-RO5-10006', 2, 1),
-(7,  'CON-0007', 7,  2, 2, 2, DATE_SUB(CURDATE(), INTERVAL 180 DAY), DATE_ADD(CURDATE(), INTERVAL 1  DAY), 'active', 'SN-RO7-10007', 2, 1),
-(8,  'CON-0008', 8,  1, 3, 3, DATE_SUB(CURDATE(), INTERVAL 365 DAY), DATE_ADD(CURDATE(), INTERVAL 4  DAY), 'active', 'SN-RO5-10008', 4, 1),
-(9,  'CON-0009', 9,  2, 1, 4, DATE_SUB(CURDATE(), INTERVAL 60  DAY), DATE_ADD(CURDATE(), INTERVAL 5  DAY), 'active', 'SN-RO7-10009', 4, 1),
-(10, 'CON-0010', 10, 1, 2, 5, DATE_SUB(CURDATE(), INTERVAL 150 DAY), DATE_ADD(CURDATE(), INTERVAL 6  DAY), 'active', 'SN-RO5-10010', 2, 1);
+(6,  'CON-0006', 6,  1, 1, 1, DATE_SUB(CURDATE(), INTERVAL 90  DAY), DATE_ADD(CURDATE(), INTERVAL 2  DAY), 'active', 'SN-DOM-10006', 2, 1),  -- D3M  domestic  3-month
+(7,  'CON-0007', 7,  2, 5, 2, DATE_SUB(CURDATE(), INTERVAL 180 DAY), DATE_ADD(CURDATE(), INTERVAL 1  DAY), 'active', 'SN-S1C-10007', 2, 1),  -- S16M  S1 commercial  6-month
+(8,  'CON-0008', 8,  1, 3, 3, DATE_SUB(CURDATE(), INTERVAL 365 DAY), DATE_ADD(CURDATE(), INTERVAL 4  DAY), 'active', 'SN-DOM-10008', 4, 1),  -- D9M  domestic  9-month
+(9,  'CON-0009', 9,  2, 6, 4, DATE_SUB(CURDATE(), INTERVAL 60  DAY), DATE_ADD(CURDATE(), INTERVAL 5  DAY), 'active', 'SN-S1C-10009', 4, 1),  -- S112M S1 commercial 12-month
+(10, 'CON-0010', 10, 1, 2, 5, DATE_SUB(CURDATE(), INTERVAL 150 DAY), DATE_ADD(CURDATE(), INTERVAL 6  DAY), 'active', 'SN-DOM-10010', 2, 1);  -- D6M  domestic  6-month
 
 -- ------------------------------------------------------------
 -- service_jobs – scheduled THIS WEEK (relative to CURDATE())
@@ -258,11 +272,11 @@ INSERT IGNORE INTO `service_contracts` (`id`, `contract_code`, `customer_id`, `p
 --                               to the top of the last-5 list
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `service_jobs` (`id`, `job_code`, `contract_id`, `customer_id`, `branch_id`, `job_type`, `status`, `priority`, `scheduled_date`, `scheduled_time`, `assigned_to`, `notes`, `cost`, `created_by`) VALUES
-(6,  'JOB-0006', 6,  6,  1, 'maintenance',  'pending',     'normal', CURDATE(),                           '09:00:00', 2, 'Quarterly filter flush – due today',              450.00, 1),
-(7,  'JOB-0007', 7,  7,  2, 'maintenance',  'assigned',    'high',   DATE_ADD(CURDATE(), INTERVAL 1 DAY), '10:30:00', 2, 'Half-yearly deep clean – due tomorrow',           700.00, 1),
-(8,  'JOB-0008', 8,  8,  3, 'repair',       'pending',     'urgent', DATE_ADD(CURDATE(), INTERVAL 2 DAY), '08:00:00', 4, 'Customer reports low flow rate',                   80.00, 1),
-(9,  'JOB-0009', 9,  9,  4, 'installation', 'assigned',    'normal', DATE_ADD(CURDATE(), INTERVAL 4 DAY), '11:00:00', 4, 'New RO-7 Pro installation at customer premises',  150.00, 1),
-(10, 'JOB-0010', 10, 10, 5, 'survey',       'in_progress', 'low',    DATE_ADD(CURDATE(), INTERVAL 6 DAY), '14:00:00', 2, 'Pre-installation site survey',                     50.00, 1);
+(6,  'JOB-0006', 6,  6,  1, 'maintenance',  'pending',     'normal', CURDATE(),                           '09:00:00', 2, 'D3M domestic 3-month service due today – filter flush',               450.00, 1),
+(7,  'JOB-0007', 7,  7,  2, 'maintenance',  'assigned',    'high',   DATE_ADD(CURDATE(), INTERVAL 1 DAY), '10:30:00', 2, 'S16M S1 commercial 6-month service – deep clean due tomorrow',        700.00, 1),
+(8,  'JOB-0008', 8,  8,  3, 'repair',       'pending',     'urgent', DATE_ADD(CURDATE(), INTERVAL 2 DAY), '08:00:00', 4, 'Customer reports low flow rate – domestic unit inspection',            80.00, 1),
+(9,  'JOB-0009', 9,  9,  4, 'installation', 'assigned',    'normal', DATE_ADD(CURDATE(), INTERVAL 4 DAY), '11:00:00', 4, 'New S1 Commercial Water Purifier installation at customer premises', 150.00, 1),
+(10, 'JOB-0010', 10, 10, 5, 'survey',       'in_progress', 'low',    DATE_ADD(CURDATE(), INTERVAL 6 DAY), '14:00:00', 2, 'Pre-installation site survey for D6M domestic service plan',           50.00, 1);
 
 -- ------------------------------------------------------------
 -- sales – current-week dates (relative)
@@ -272,11 +286,11 @@ INSERT IGNORE INTO `service_jobs` (`id`, `job_code`, `contract_id`, `customer_id
 --   Revenue chart   – sale_date within last 12 months
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `sales` (`id`, `sale_code`, `customer_id`, `branch_id`, `sale_date`, `status`, `payment_status`, `subtotal`, `discount`, `tax`, `total`, `paid_amount`, `notes`, `created_by`) VALUES
-(6,  'SALE-0006', 6,  1, CURDATE(),                           'delivered', 'paid',    150.00,  0.00, 0.00, 150.00, 150.00, 'RO-5 replacement unit',                    1),
-(7,  'SALE-0007', 7,  2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'confirmed', 'partial', 220.00,  0.00, 0.00, 220.00, 110.00, 'RO-7 Pro upgrade – first instalment paid', 1),
-(8,  'SALE-0008', 8,  3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 'delivered', 'paid',     57.00,  0.00, 0.00,  57.00,  57.00, 'Membrane + pre-filter set replacement',    1),
-(9,  'SALE-0009', 9,  4, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 'confirmed', 'pending', 220.00, 10.00, 0.00, 210.00,   0.00, 'Commercial unit – pending payment',        1),
-(10, 'SALE-0010', 10, 5, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 'delivered', 'paid',     36.00,  0.00, 0.00,  36.00,  36.00, 'Anti-scale chemical treatment pack',       1);
+(6,  'SALE-0006', 6,  1, CURDATE(),                           'delivered', 'paid',    150.00,  0.00, 0.00, 150.00, 150.00, 'Domestic Water Purifier replacement unit',                 1),
+(7,  'SALE-0007', 7,  2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 'confirmed', 'partial', 220.00,  0.00, 0.00, 220.00, 110.00, 'S1 Commercial Water Purifier upgrade – first instalment', 1),
+(8,  'SALE-0008', 8,  3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 'delivered', 'paid',     57.00,  0.00, 0.00,  57.00,  57.00, 'Membrane + pre-filter set replacement',                    1),
+(9,  'SALE-0009', 9,  4, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 'confirmed', 'pending', 220.00, 10.00, 0.00, 210.00,   0.00, 'S1 Commercial unit – pending payment',                    1),
+(10, 'SALE-0010', 10, 5, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 'delivered', 'paid',     36.00,  0.00, 0.00,  36.00,  36.00, 'Anti-scale chemical treatment pack',                       1);
 
 -- sale_items for the new sales
 INSERT IGNORE INTO `sale_items` (`sale_id`, `product_id`, `quantity`, `unit_price`, `discount`, `total`) VALUES
