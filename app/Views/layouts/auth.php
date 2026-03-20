@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'Login', ENT_QUOTES, 'UTF-8') ?> &mdash; AquaCRM</title>
-    <meta name="description" content="AquaCRM – Domestic Water Purification CRM">
+    <?php
+    $authAppName = 'AquaCRM';
+    try {
+        $nameRow = \App\Core\Database::getInstance()->fetch(
+            "SELECT `value` FROM `settings` WHERE `key` = 'app_name' LIMIT 1"
+        );
+        if ($nameRow && !empty($nameRow['value'])) {
+            $authAppName = $nameRow['value'];
+        }
+    } catch (\Throwable) {}
+    ?>
+    <title><?= htmlspecialchars($pageTitle ?? 'Login', ENT_QUOTES, 'UTF-8') ?> &mdash; <?= htmlspecialchars($authAppName, ENT_QUOTES, 'UTF-8') ?></title>
+    <meta name="description" content="<?= htmlspecialchars($authAppName, ENT_QUOTES, 'UTF-8') ?> – Domestic Water Purification CRM">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>

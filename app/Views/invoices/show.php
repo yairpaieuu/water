@@ -6,6 +6,17 @@ $items  = $items  ?? [];
 
 $pageTitle = 'Invoice — ' . ($sale['sale_code'] ?? '');
 
+// Fetch business name for the invoice header
+$invoiceAppName = 'AquaCRM';
+try {
+    $nameRow = \App\Core\Database::getInstance()->fetch(
+        "SELECT `value` FROM `settings` WHERE `key` = 'app_name' LIMIT 1"
+    );
+    if ($nameRow && !empty($nameRow['value'])) {
+        $invoiceAppName = $nameRow['value'];
+    }
+} catch (\Throwable) {}
+
 function invShowPaymentBadge(string $s): string
 {
     return match ($s) {
@@ -71,7 +82,7 @@ function invShowPaymentBadge(string $s): string
     <!-- Header: Company + Invoice title -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6 mb-8 pb-6 border-b border-slate-200">
         <div>
-            <h2 class="text-2xl font-bold text-sky-600">AquaCRM</h2>
+            <h2 class="text-2xl font-bold text-sky-600"><?= htmlspecialchars($invoiceAppName, ENT_QUOTES, 'UTF-8') ?></h2>
             <p class="text-sm text-slate-500 mt-1">Water Purification Services</p>
         </div>
         <div class="text-right">

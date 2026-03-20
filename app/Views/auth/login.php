@@ -5,13 +5,21 @@
     <div class="px-8 pt-8 pb-6 text-center bg-gradient-to-b from-primary-500/20 to-transparent">
         <!-- Logo mark -->
         <?php
-        $loginLogo = '';
+        $loginLogo    = '';
+        $loginAppName = 'AquaCRM';
         try {
-            $logoRow = \App\Core\Database::getInstance()->fetch(
+            $db = \App\Core\Database::getInstance();
+            $logoRow = $db->fetch(
                 "SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1"
             );
             if ($logoRow && !empty($logoRow['value'])) {
                 $loginLogo = $logoRow['value'];
+            }
+            $nameRow = $db->fetch(
+                "SELECT `value` FROM `settings` WHERE `key` = 'app_name' LIMIT 1"
+            );
+            if ($nameRow && !empty($nameRow['value'])) {
+                $loginAppName = $nameRow['value'];
             }
         } catch (\Throwable) {}
         ?>
@@ -29,7 +37,7 @@
             </svg>
         </div>
         <?php endif; ?>
-        <h1 class="text-3xl font-extrabold text-white tracking-tight">AquaCRM</h1>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight"><?= htmlspecialchars($loginAppName, ENT_QUOTES, 'UTF-8') ?></h1>
         <p class="mt-1 text-sm text-blue-200">Domestic Water Purification Solutions</p>
     </div>
 
@@ -159,7 +167,7 @@
 
         <!-- Footer note -->
         <p class="mt-6 text-center text-xs text-slate-400">
-            &copy; <?= date('Y') ?> AquaCRM &mdash; All rights reserved
+            &copy; <?= date('Y') ?> <?= htmlspecialchars($loginAppName, ENT_QUOTES, 'UTF-8') ?> &mdash; All rights reserved
         </p>
     </div>
 </div>

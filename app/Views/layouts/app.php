@@ -1,10 +1,26 @@
+<?php
+// Fetch app name and logo once at the top so they are available everywhere in this layout
+$sidebarAppName = 'AquaCRM';
+$sidebarLogo    = '';
+try {
+    $db = \App\Core\Database::getInstance();
+    $nameRow = $db->fetch("SELECT `value` FROM `settings` WHERE `key` = 'app_name' LIMIT 1");
+    if ($nameRow && !empty($nameRow['value'])) {
+        $sidebarAppName = $nameRow['value'];
+    }
+    $logoRow = $db->fetch("SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1");
+    if ($logoRow && !empty($logoRow['value'])) {
+        $sidebarLogo = $logoRow['value'];
+    }
+} catch (\Throwable) {}
+?>
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'AquaCRM', ENT_QUOTES, 'UTF-8') ?> &mdash; AquaCRM</title>
-    <meta name="description" content="AquaCRM – Domestic Water Purification CRM">
+    <title><?= htmlspecialchars($pageTitle ?? $sidebarAppName, ENT_QUOTES, 'UTF-8') ?> &mdash; <?= htmlspecialchars($sidebarAppName, ENT_QUOTES, 'UTF-8') ?></title>
+    <meta name="description" content="<?= htmlspecialchars($sidebarAppName, ENT_QUOTES, 'UTF-8') ?> – Domestic Water Purification CRM">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -58,17 +74,6 @@
     <!-- Logo -->
     <div class="flex items-center justify-between h-16 px-4 border-b border-slate-700 flex-shrink-0">
         <a href="/dashboard" class="flex items-center gap-2">
-            <?php
-            $sidebarLogo = '';
-            try {
-                $logoRow = \App\Core\Database::getInstance()->fetch(
-                    "SELECT `value` FROM `settings` WHERE `key` = 'app_logo' LIMIT 1"
-                );
-                if ($logoRow && !empty($logoRow['value'])) {
-                    $sidebarLogo = $logoRow['value'];
-                }
-            } catch (\Throwable) {}
-            ?>
             <?php if ($sidebarLogo): ?>
             <img src="<?= htmlspecialchars('/assets/uploads/' . $sidebarLogo, ENT_QUOTES, 'UTF-8') ?>"
                  alt="Logo"
@@ -81,7 +86,7 @@
                 </svg>
             </div>
             <?php endif; ?>
-            <span class="text-white font-bold text-lg tracking-tight">AquaCRM</span>
+            <span class="text-white font-bold text-lg tracking-tight"><?= htmlspecialchars($sidebarAppName, ENT_QUOTES, 'UTF-8') ?></span>
         </a>
         <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,7 +304,7 @@
 
     <!-- Footer -->
     <footer class="px-4 py-3 text-center text-xs text-slate-400 border-t border-slate-200">
-        &copy; <?= date('Y') ?> AquaCRM &mdash; Domestic Water Purification Solutions
+        &copy; <?= date('Y') ?> <?= htmlspecialchars($sidebarAppName, ENT_QUOTES, 'UTF-8') ?> &mdash; Domestic Water Purification Solutions
     </footer>
 </div>
 
