@@ -89,6 +89,10 @@ class App
         $router->post('/orders/{id}/update',  'SalesController@update', ['auth']);
         $router->post('/orders/{id}/delete',  'SalesController@delete', ['auth']);
 
+        // Invoices (confirmed/delivered sales)
+        $router->get('/invoices',      'InvoiceController@index', ['auth']);
+        $router->get('/invoices/{id}', 'InvoiceController@show',  ['auth']);
+
         // Inventory / Products
         $router->get('/inventory',              'InventoryController@index',       ['auth']);
         $router->get('/inventory/create',       'InventoryController@create',      ['auth']);

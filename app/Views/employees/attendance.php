@@ -32,10 +32,7 @@
         </thead>
         <tbody class="divide-y divide-slate-100">
           <?php foreach ($employees as $emp):
-            $existing = null;
-            foreach ($attendance as $att) {
-                if ($att['employee_id'] == $emp['id']) { $existing = $att; break; }
-            }
+            $existing = $attendance[$emp['id']] ?? null;
             $currentStatus = $existing['status'] ?? '';
             $currentIn     = $existing['check_in'] ?? '';
             $currentOut    = $existing['check_out'] ?? '';

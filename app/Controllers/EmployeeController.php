@@ -204,40 +204,56 @@ class EmployeeController extends BaseController
         $date     = $request->get('date', date('Y-m-d'));
         $branchId = (int) $request->get('branch_id', 0);
 
-        $db     = Database::getInstance();
-        $where  = ['DATE(a.`date`) = ?'];
-        $params = [$date];
+        $db = Database::getInstance();
 
+        // Fetch all active employees (optionally filtered by branch)
+        $empWhere  = ['e.`status` = ?'];
+        $empParams = ['active'];
         if ($branchId > 0) {
-            $where[]  = 'e.`branch_id` = ?';
-            $params[] = $branchId;
+            $empWhere[]  = 'e.`branch_id` = ?';
+            $empParams[] = $branchId;
         }
-
-        $whereSql  = ' WHERE ' . implode(' AND ', $where);
-        $records   = $db->fetchAll(
-            "SELECT a.*,
-                    e.`employee_code`,
-                    CONCAT(e.`first_name`, ' ', e.`last_name`) AS employee_name,
-                    e.`department`,
-                    b.`name` AS branch_name
-               FROM `attendance` a
-               JOIN `employees` e ON e.`id` = a.`employee_id`
-          LEFT JOIN `branches`  b ON b.`id` = e.`branch_id`"
-            . $whereSql
-            . " ORDER BY e.`first_name` ASC",
-            $params
+        $employees = $db->fetchAll(
+            "SELECT e.*, b.`name` AS branch_name
+               FROM `employees` e
+          LEFT JOIN `branches` b ON b.`id` = e.`branch_id`
+              WHERE " . implode(' AND ', $empWhere)
+            . " ORDER BY e.`first_name` ASC, e.`last_name` ASC",
+            $empParams
         );
 
+        // Fetch attendance records for the selected date
+        $attWhere  = ['DATE(a.`date`) = ?'];
+        $attParams = [$date];
+        if ($branchId > 0) {
+            $attWhere[]  = 'e.`branch_id` = ?';
+            $attParams[] = $branchId;
+        }
+        $attRows = $db->fetchAll(
+            "SELECT a.*
+               FROM `attendance` a
+               JOIN `employees` e ON e.`id` = a.`employee_id`
+              WHERE " . implode(' AND ', $attWhere),
+            $attParams
+        );
+
+        // Key attendance by employee_id for quick lookup in the view
+        $attendance = [];
+        foreach ($attRows as $row) {
+            $attendance[$row['employee_id']] = $row;
+        }
+
         $this->render('employees.attendance', [
-            'pageTitle' => 'Attendance',
-            'records'   => $records,
-            'branches'  => (new Branch())->getActive(),
-            'date'      => $date,
-            'branchId'  => $branchId,
-            'csrfField' => CSRF::field(),
-            'user'      => Auth::user(),
-            'success'   => Session::getFlash('success'),
-            'error'     => Session::getFlash('error'),
+            'pageTitle'  => 'Attendance',
+            'employees'  => $employees,
+            'attendance' => $attendance,
+            'branches'   => (new Branch())->getActive(),
+            'date'       => $date,
+            'branchId'   => $branchId,
+            'csrfField'  => CSRF::field(),
+            'user'       => Auth::user(),
+            'success'    => Session::getFlash('success'),
+            'error'      => Session::getFlash('error'),
         ]);
     }
 
