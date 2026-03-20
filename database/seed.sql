@@ -485,6 +485,180 @@ VALUES
     (1, 'maternity', '2026-01-15', '2026-04-15',60, 'Maternity leave',          'approved', 1),
     (6, 'annual',    '2025-12-20', '2025-12-24', 5, 'Year-end holiday',         'approved', 1),
     (7, 'sick',      '2025-11-03', '2025-11-03', 1, 'Not feeling well',         'approved', 1),
-    (8, 'casual',    '2026-02-14', '2026-02-14', 1, 'Personal errand',          'pending',  NULL);
+    (8, 'casual',    '2026-02-14', '2026-02-14', 1, 'Personal errand',          'pending',  NULL),
+    -- no_pay leave type (covers all five leave_type ENUM values, employee_id=2)
+    (2, 'no_pay',    '2025-06-02', '2025-06-06', 5, 'Unpaid personal leave',    'approved', 1);
+
+-- ============================================================
+-- 16. ADDITIONAL DATA FOR COMPLETE PROCESS COVERAGE
+--     The sections below ensure every ENUM value, every
+--     application feature, and every report query has realistic
+--     data to display.
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- 16a. Settings – populate all configurable keys so the
+--      Settings page is fully populated on first load.
+--      INSERT IGNORE means schema.sql base values are preserved.
+-- ------------------------------------------------------------
+INSERT IGNORE INTO `settings` (`key`, `value`) VALUES
+    ('app_name',    'AquaCRM'),
+    ('timezone',    'Asia/Colombo'),
+    ('currency',    'LKR'),
+    ('app_logo',    ''),
+    ('app_email',   'info@aquacrm.test'),
+    ('app_phone',   '+94 11 234 5678'),
+    ('app_address', '123 Main Street, Colombo 03, Sri Lanka'),
+    ('date_format', 'd/m/Y');
+
+-- ------------------------------------------------------------
+-- 16b. Service contracts – lifecycle state coverage
+--      Adds expired, suspended, and cancelled contract examples
+--      using existing customers so every status appears in the
+--      Contracts list and contract-status report widget.
+-- ------------------------------------------------------------
+INSERT INTO `service_contracts`
+    (`id`, `contract_code`, `customer_id`, `product_id`, `service_type_id`,
+     `branch_id`, `installation_date`, `next_service_date`,
+     `status`, `serial_number`, `assigned_technician_id`, `created_by`)
+VALUES
+    -- EXPIRED: D6M contract for Malini De Silva – ended naturally
+    (13, 'CON-0013', 2, 1, 2, 1,
+         '2023-01-10', '2023-07-10', 'expired', 'SN-DOM-20001', 3, 1),
+    -- SUSPENDED: D9M contract for Saman Wickramasinghe – on hold
+    (14, 'CON-0014', 5, 1, 3, 3,
+         '2024-04-01', '2025-01-01', 'suspended', 'SN-DOM-20002', 7, 1),
+    -- CANCELLED: D3M contract for Kumari Amarasinghe – cancelled by customer
+    (15, 'CON-0015', 10, 1, 1, 5,
+         '2024-07-15', '2024-10-15', 'cancelled', 'SN-DOM-20003', 3, 1);
+
+-- ------------------------------------------------------------
+-- 16c. Service jobs – status + job-type coverage
+--      Adds: in_progress, cancelled statuses; repair, survey types
+-- ------------------------------------------------------------
+INSERT INTO `service_jobs`
+    (`id`, `job_code`, `contract_id`, `customer_id`, `branch_id`, `job_type`,
+     `status`, `priority`, `scheduled_date`, `scheduled_time`,
+     `assigned_to`, `notes`, `cost`, `created_by`, `created_at`)
+VALUES
+    -- REPAIR + IN_PROGRESS: low pressure fault at Chaminda Perera
+    (11, 'JOB-0011', 1, 1, 1, 'repair',
+         'in_progress', 'high',
+         CURDATE(), '10:00:00', 3,
+         'Customer reports very low water pressure – pump and membrane inspection in progress.',
+         1200.00, 1, NOW()),
+    -- SURVEY + PENDING: pre-installation survey for a prospect in Galle
+    (12, 'JOB-0012', NULL, 5, 3, 'survey',
+         'pending', 'normal',
+         DATE_ADD(CURDATE(), INTERVAL 3 DAY), '11:00:00', 7,
+         'Pre-installation site survey for Saman Wickramasinghe – assess pipe work and filter location.',
+         0.00, 1, NOW()),
+    -- REPAIR + CANCELLED: repair booking cancelled by customer
+    (13, 'JOB-0013', NULL, 3, 2, 'repair',
+         'cancelled', 'normal',
+         DATE_SUB(CURDATE(), INTERVAL 8 DAY), '14:00:00', 5,
+         'Repair visit cancelled – customer requested reschedule. To be rebooked.',
+         0.00, 1, DATE_SUB(NOW(), INTERVAL 9 DAY));
+
+-- ------------------------------------------------------------
+-- 16d. Update completed service jobs with completion_notes
+--      and parts_used JSON so the job detail view is fully
+--      populated for every completed job.
+-- ------------------------------------------------------------
+UPDATE `service_jobs` SET
+    `completion_notes` = 'Domestic purifier (D6M) installed successfully. Full pressure test passed. TDS reading: 32 ppm. Customer briefed on filter schedule.',
+    `parts_used`       = '[{"product_id":1,"name":"Domestic Water Purifier","quantity":1,"unit_price":15000.00}]'
+WHERE `id` = 1;
+
+UPDATE `service_jobs` SET
+    `completion_notes` = 'D6M 6-month service complete. Pre-filter set replaced, membrane flushed, UV lamp checked. TDS: 28 ppm. Next service scheduled.',
+    `parts_used`       = '[{"product_id":4,"name":"Pre-Filter Set (3-pack)","quantity":1,"unit_price":2200.00}]'
+WHERE `id` = 2;
+
+UPDATE `service_jobs` SET
+    `completion_notes` = 'D6M domestic service completed for Saman Wickramasinghe. Filters and membrane replaced. Water quality confirmed within safe limits.',
+    `parts_used`       = '[{"product_id":4,"name":"Pre-Filter Set (3-pack)","quantity":1,"unit_price":2200.00},{"product_id":3,"name":"Membrane Filter 50GPD","quantity":1,"unit_price":3500.00}]'
+WHERE `id` = 3;
+
+UPDATE `service_jobs` SET
+    `completion_notes` = 'S1 commercial unit installed at Lanka Hotels Ltd. All six outlet points tested. TDS: 18 ppm. Anti-scale dosing system configured.',
+    `parts_used`       = '[{"product_id":2,"name":"S1 Commercial Water Purifier","quantity":1,"unit_price":22000.00},{"product_id":5,"name":"Anti-Scale Chemical 5L","quantity":2,"unit_price":1800.00}]'
+WHERE `id` = 4;
+
+UPDATE `service_jobs` SET
+    `completion_notes` = 'S1 commercial unit installed at Kandy Spice Garden. Kitchen and bar outlets tested. Customer satisfied – signed 12-month S112M service plan.',
+    `parts_used`       = '[{"product_id":2,"name":"S1 Commercial Water Purifier","quantity":1,"unit_price":22000.00}]'
+WHERE `id` = 5;
+
+-- ------------------------------------------------------------
+-- 16e. Leads – add a 'lost' lead to cover all pipeline stages
+-- ------------------------------------------------------------
+INSERT INTO `leads`
+    (`id`, `lead_code`, `first_name`, `last_name`, `email`, `phone`,
+     `address`, `city`, `branch_id`, `source`, `status`, `assigned_to`, `created_by`)
+VALUES
+    (7, 'LEAD-0007', 'Dharshan', 'Prasad', 'dharshan.prasad@example.com', '+94 71 301 0007',
+        '6, Old Kandy Road, Kurunegala', 'Kurunegala', 2, 'online', 'lost', 4, 1);
+
+-- ------------------------------------------------------------
+-- 16f. Sales – add a cancelled order to cover all order statuses
+-- ------------------------------------------------------------
+INSERT INTO `sales`
+    (`id`, `sale_code`, `customer_id`, `branch_id`, `sale_date`,
+     `status`, `payment_status`, `subtotal`, `discount`, `tax`, `total`, `paid_amount`,
+     `notes`, `created_by`, `created_at`)
+VALUES
+    (16, 'SALE-0016', 4, 2, DATE_SUB(CURDATE(), INTERVAL 5 MONTH),
+         'cancelled', 'pending', 15000.00, 0.00, 0.00, 15000.00, 0.00,
+         'Customer cancelled order – decided to defer purchase.',
+         1, DATE_SUB(NOW(), INTERVAL 5 MONTH));
+
+-- sale_item for the cancelled order (kept for referential integrity)
+INSERT INTO `sale_items` (`sale_id`, `product_id`, `quantity`, `unit_price`, `discount`, `total`)
+VALUES (16, 1, 1, 15000.00, 0.00, 15000.00);
+
+-- ------------------------------------------------------------
+-- 16g. Attendance – add half_day and leave statuses
+--      Uses dates 6–10 working days back (outside the existing
+--      5-day window) so UNIQUE KEY (employee_id, date) is safe.
+-- ------------------------------------------------------------
+INSERT IGNORE INTO `attendance` (`employee_id`, `date`, `check_in`, `check_out`, `status`, `notes`) VALUES
+-- Day -6: half_day examples
+(1, DATE_SUB(CURDATE(), INTERVAL 6 DAY), '09:00:00', '13:00:00', 'half_day', 'Doctor appointment afternoon'),
+(3, DATE_SUB(CURDATE(), INTERVAL 6 DAY), '09:00:00', '13:00:00', 'half_day', 'Personal errand'),
+(5, DATE_SUB(CURDATE(), INTERVAL 6 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(7, DATE_SUB(CURDATE(), INTERVAL 6 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+-- Day -7: leave examples (approved annual / sick leave)
+(2, DATE_SUB(CURDATE(), INTERVAL 7 DAY), NULL,        NULL,       'leave',    'Approved annual leave'),
+(4, DATE_SUB(CURDATE(), INTERVAL 7 DAY), NULL,        NULL,       'leave',    'Approved sick leave'),
+(6, DATE_SUB(CURDATE(), INTERVAL 7 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(8, DATE_SUB(CURDATE(), INTERVAL 7 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+-- Day -8
+(1, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '08:55:00', '17:00:00', 'present',  NULL),
+(2, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(3, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '08:45:00', '17:00:00', 'present',  NULL),
+(4, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(5, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '08:30:00', '17:00:00', 'present',  NULL),
+(6, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(7, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '09:10:00', '17:00:00', 'late',     NULL),
+(8, DATE_SUB(CURDATE(), INTERVAL 8 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+-- Day -9
+(1, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(2, DATE_SUB(CURDATE(), INTERVAL 9 DAY), NULL,        NULL,       'absent',   NULL),
+(3, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(4, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(5, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '08:30:00', '17:00:00', 'present',  NULL),
+(6, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '08:45:00', '17:00:00', 'present',  NULL),
+(7, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(8, DATE_SUB(CURDATE(), INTERVAL 9 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+-- Day -10
+(1, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '08:50:00', '17:00:00', 'present',  NULL),
+(2, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(3, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(4, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '09:30:00', '17:00:00', 'late',     NULL),
+(5, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '08:30:00', '13:00:00', 'half_day', 'Early leave approved'),
+(6, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(7, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '09:00:00', '17:00:00', 'present',  NULL),
+(8, DATE_SUB(CURDATE(), INTERVAL 10 DAY), '09:00:00', '17:00:00', 'present',  NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
