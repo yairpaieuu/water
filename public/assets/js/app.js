@@ -266,7 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================================
-   Utility: HTML escape
+   Utility: HTML escape (for HTML text-node content only)
+   NOTE: This function is safe for inserting text into HTML
+   element content. Do NOT use it for HTML attribute values,
+   JavaScript string literals, or CSS contexts — those require
+   additional, context-specific escaping.
    ============================================================ */
 function escapeHtml(str) {
     return String(str)

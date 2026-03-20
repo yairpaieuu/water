@@ -141,7 +141,7 @@ class Validator
                 "SELECT COUNT(*) AS cnt FROM `{$table}` WHERE `{$column}` = ?",
                 [$value]
             );
-            return ($row['cnt'] ?? 1) === 0;
+            return ($row['cnt'] ?? 0) === 0;
         } catch (\Throwable) {
             return true; // Fail open – do not block if DB is unavailable
         }

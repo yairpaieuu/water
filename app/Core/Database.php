@@ -78,10 +78,9 @@ class Database
     /**
      * Update rows in a table.
      * @param array<string, mixed> $data
-     * @param array<string, mixed> $where        WHERE clause as ['column' => value, ...]
-     * @param array<mixed>         $whereParams  (unused – kept for BC; derived from $where)
+     * @param array<string, mixed> $where  WHERE clause as ['column' => value, ...]
      */
-    public function update(string $table, array $data, array $where, array $whereParams = []): bool
+    public function update(string $table, array $data, array $where): bool
     {
         $table = $this->quoteIdentifier($table);
 
@@ -103,9 +102,9 @@ class Database
 
     /**
      * Delete rows from a table.
-     * @param array<string, mixed> $where WHERE clause as ['column' => value, ...]
+     * @param array<string, mixed> $where  WHERE clause as ['column' => value, ...]
      */
-    public function delete(string $table, array $where, array $params = []): bool
+    public function delete(string $table, array $where): bool
     {
         $table = $this->quoteIdentifier($table);
 
@@ -114,10 +113,9 @@ class Database
             array_keys($where)
         );
 
-        $sql        = "DELETE FROM {$table} WHERE " . implode(' AND ', $whereParts);
-        $bindParams = empty($params) ? array_values($where) : $params;
+        $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', $whereParts);
 
-        return $this->query($sql, $bindParams)->rowCount() > 0;
+        return $this->query($sql, array_values($where))->rowCount() > 0;
     }
 
     public function lastInsertId(): string|false

@@ -47,9 +47,19 @@ abstract class BaseModel
         }
 
         if ($orderBy !== '') {
-            // Whitelist: only word characters and comma/space/ASC/DESC
-            $safe = preg_replace('/[^a-zA-Z0-9_,\s]/', '', $orderBy);
-            $sql .= " ORDER BY {$safe}";
+            // Accept only simple "column [ASC|DESC]" or comma-separated pairs.
+            // Each segment must be: word_chars optionally followed by ASC or DESC.
+            $segments = array_map('trim', explode(',', $orderBy));
+            $safeParts = [];
+            foreach ($segments as $seg) {
+                if (preg_match('/^([a-zA-Z_][a-zA-Z0-9_]*)(?:\s+(ASC|DESC))?$/i', $seg, $m)) {
+                    $safeParts[] = '`' . $m[1] . '`' . (isset($m[2]) ? ' ' . strtoupper($m[2]) : '');
+                }
+                // Silently discard any segment that doesn't match the whitelist pattern
+            }
+            if (!empty($safeParts)) {
+                $sql .= ' ORDER BY ' . implode(', ', $safeParts);
+            }
         }
 
         if ($limit > 0) {

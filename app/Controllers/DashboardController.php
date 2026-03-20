@@ -46,6 +46,7 @@ class DashboardController extends BaseController
     private function safeCount(Database $db, string $table, string $where = ''): int
     {
         try {
+            // $where is always a hardcoded internal string – never derived from user input.
             $sql = "SELECT COUNT(*) AS cnt FROM `{$table}`" . ($where ? " WHERE {$where}" : '');
             $row = $db->fetch($sql, []);
             return (int) ($row['cnt'] ?? 0);
@@ -57,6 +58,7 @@ class DashboardController extends BaseController
     private function safeSum(Database $db, string $table, string $column, string $where = ''): float
     {
         try {
+            // $where is always a hardcoded internal string – never derived from user input.
             $sql = "SELECT COALESCE(SUM(`{$column}`), 0) AS total FROM `{$table}`"
                  . ($where ? " WHERE {$where}" : '');
             $row = $db->fetch($sql, []);
