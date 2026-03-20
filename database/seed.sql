@@ -4,6 +4,7 @@
 -- Provides comprehensive demo data for every main process table.
 -- ============================================================
 
+SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ------------------------------------------------------------
