@@ -32,8 +32,8 @@ class DashboardController extends BaseController
 
         $totalCustomers  = $this->safeCount($db, 'customers');
         $activeServices  = $this->safeCount($db, 'service_contracts', "`status` = 'active'");
-        $pendingJobs     = $this->safeCount($db, 'jobs', "`status` = 'pending'");
-        $monthlyRevenue  = $this->safeSum($db, 'invoices', 'amount', "status = 'paid' AND MONTH(paid_at) = MONTH(CURDATE()) AND YEAR(paid_at) = YEAR(CURDATE())");
+        $pendingJobs     = $this->safeCount($db, 'service_jobs', "`status` = 'pending'");
+        $monthlyRevenue  = $this->safeSum($db, 'sales', 'total', "`status` != 'cancelled' AND `payment_status` = 'paid' AND MONTH(`sale_date`) = MONTH(CURDATE()) AND YEAR(`sale_date`) = YEAR(CURDATE())");
 
         return [
             'total_customers' => $totalCustomers,
